@@ -66,7 +66,7 @@ export default {
         };
         vm.$bus.$emit('alertmessage', msg);
 
-        vm.$router.push('/');
+        vm.$router.push('/admin/productsmanage');
       }).catch(() => {
         vm.isLoading = false;
         const msg = {
