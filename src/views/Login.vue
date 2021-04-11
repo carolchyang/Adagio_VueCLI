@@ -2,22 +2,28 @@
   <div class="login">
     <h1 class="logo">Adagio</h1>
 
-    <form class="form-signin">
+    <ValidationObserver class="form-signin" v-slot="{ invalid }" tag="form"
+     @submit.prevent="login()">
       <h2 class="mb-4 text-center">登入後台</h2>
-      <div class="form-group" name="電子信箱">
+
+      <ValidationProvider class="form-group" name="電子信箱" rules="required|email" tag="div"
+       v-slot="{ errors, classes }">
         <label for="email">電子信箱</label>
         <input type="email" id="email" class="form-control" placeholder="請輸入電子信箱"
-        v-model="auth.email" required>
-        <span class="invalid-feedback"></span>
-      </div>
-      <div class="form-group mb-4" name="密碼">
+         :class="classes" v-model="auth.email" required>
+        <span class="invalid-feedback">{{ errors[0] }}</span>
+      </ValidationProvider>
+
+      <ValidationProvider class="form-group mb-4" name="密碼" rules="required" tag="div"
+       v-slot="{ errors, classes }">
         <label for="password">密碼</label>
         <input type="password" id="password" class="form-control" placeholder="請輸入密碼"
-        v-model="auth.password" required>
-        <span class="invalid-feedback"></span>
-      </div>
-      <button class="btn btn-dark btn-lg btn-block" type="submit">確認</button>
-    </form>
+         :class="classes" v-model="auth.password" required>
+        <span class="invalid-feedback">{{ errors[0] }}</span>
+      </ValidationProvider>
+
+      <button class="btn btn-dark btn-lg btn-block" type="submit" :disabled="invalid">確認</button>
+    </ValidationObserver>
 
     <router-link to="/" class="text-white">
       回到首頁
