@@ -1,5 +1,8 @@
 <template>
   <div class="login">
+    <AlertMessage/>
+    <loading :active.sync="isLoading" :is-full-page="true"></loading>
+
     <h1 class="logo">Adagio</h1>
 
     <ValidationObserver class="form-signin" v-slot="{ invalid }" tag="form"
@@ -35,10 +38,13 @@
 </template>
 
 <script>
+import AlertMessage from '@/components/AlertMessage.vue';
+
 export default {
   name: 'Login',
   data() {
     return {
+      isLoading: false,
       auth: {
         email: '',
         password: '',
@@ -47,7 +53,32 @@ export default {
   },
   methods: {
     login() {
+      const vm = this;
+      const apiUrl = `${process.env.VUE_APP_APIPATH}/auth/login`;
+      vm.isLoading = true;
+      vm.$http.post(apiUrl, vm.auth).then((res) => {
+        const { token, expired } = res.data;
+        document.cookie = `hex=${token}; expries=${new Date(expired * 1000)}; path=/`;
+        vm.isLoading = false;
+        const msg = {
+          icon: 'success',
+          title: '登入成功',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+
+        vm.$router.push('/');
+      }).catch(() => {
+        vm.isLoading = false;
+        const msg = {
+          icon: 'error',
+          title: '登入失敗',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      });
     },
+  },
+  components: {
+    AlertMessage,
   },
 };
 </script>

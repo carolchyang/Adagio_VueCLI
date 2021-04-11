@@ -11,9 +11,11 @@ import {
 import { email, required } from 'vee-validate/dist/rules';
 import TW from 'vee-validate/dist/locale/zh_TW.json';
 import VueSweetalert2 from 'vue-sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 import App from './App.vue';
 import router from './router';
+import './bus';
 import store from './store';
 
 // jquery 設定
