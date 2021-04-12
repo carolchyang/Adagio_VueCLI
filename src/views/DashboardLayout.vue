@@ -80,6 +80,29 @@ export default {
   },
   methods: {
     logout() {
+      const vm = this;
+      const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1');
+      vm.isLoading = true;
+      vm.$http({
+        method: 'post',
+        url: `${process.env.VUE_APP_APIPATH}/auth/logout`,
+        data: { api_token: token },
+        herders: {
+          authorization: `Bearer ${token}`,
+        },
+      }).then(() => {
+        // 清空 cookie
+        document.cookie = 'hexToken=;expires=;path=/';
+        vm.checkLogin = false;
+
+        const msg = {
+          icon: 'success',
+          title: '登出成功',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+
+        vm.$router.push('/login');
+      });
     },
     checkLogin() {
       const vm = this;
