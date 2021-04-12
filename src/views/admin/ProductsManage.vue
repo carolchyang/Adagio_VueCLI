@@ -242,8 +242,36 @@ export default {
       }
     },
     updateProduct() {
-      console.log('更新產品');
-      $('#editModal').modal('hide');
+      const vm = this;
+      let url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/product`;
+      let method = 'post';
+      let statusTitle = '新增';
+
+      if (vm.status === 'update') {
+        method = 'patch';
+        url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/product/${vm.tempProduct.id}`;
+        statusTitle = '更新';
+      }
+
+      vm.isLoading = true;
+      vm.$http[method](url, vm.tempProduct).then(() => {
+        $('#editModal').modal('hide');
+        vm.isLoading = false;
+        vm.getProducts();
+        const msg = {
+          icon: 'success',
+          title: `${statusTitle}產品成功`,
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      }).catch(() => {
+        $('#editModal').modal('hide');
+        vm.isLoading = false;
+        const msg = {
+          icon: 'error',
+          title: `${statusTitle}產品失敗`,
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      });
     },
     delProduct() {
       console.log('刪除產品');
