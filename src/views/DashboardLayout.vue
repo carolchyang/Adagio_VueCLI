@@ -58,7 +58,7 @@
         </nav>
 
         <main class="col-md-9 col-lg-10 p-4">
-          <router-view/>
+          <router-view v-if="checkSuccess"/>
         </main>
       </div>
     </div>
@@ -74,15 +74,48 @@ export default {
   data() {
     return {
       isLoading: false,
+      token: '',
+      checkSuccess: false,
     };
   },
   methods: {
     logout() {
     },
+    checkLogin() {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/auth/check`;
+      vm.token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1');
+      vm.isLoaing = true;
+      vm.$http.post(url, { api_token: vm.token }).then((res) => {
+        if (!res.data.success) {
+          const msg = {
+            icon: 'error',
+            title: '出現錯誤',
+          };
+          vm.$bus.$emit('alertmessage', msg);
+          vm.$router.push('/login');
+        }
+
+        vm.checkSuccess = true;
+        vm.$http.defaults.headers.common.Authorization = `Bearer ${vm.token}`;
+        vm.isLoading = false;
+      }).catch(() => {
+        const msg = {
+          icon: 'error',
+          title: '出現錯誤',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+        vm.$router.push('/login');
+      });
+    },
   },
   components: {
     AlertMessage,
   },
+  created() {
+    this.checkLogin();
+  },
+
 };
 </script>
 
