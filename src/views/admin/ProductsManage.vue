@@ -1,13 +1,294 @@
 <template>
-  <div>products</div>
+  <div>
+    <loading :active.sync="isLoading" :is-full-page="true"></loading>
+
+    <div class="mb-4 text-right">
+      <button type="button" class="btn btn-dark" @click.prevent="openModal('create')">
+        新增產品
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col" class="d-none d-md-table-cell">分類</th>
+            <th scope="col" class="d-none d-lg-table-cell">縮圖</th>
+            <th scope="col">產品名稱</th>
+            <th scope="col" class="d-none d-lg-table-cell">原價</th>
+            <th scope="col" class="d-none d-sm-table-cell">售價</th>
+            <th scope="col" class="d-none d-sm-table-cell">是否啟用</th>
+            <th scope="col">編輯</th>
+          </tr>
+        </thead>
+        <tbody v-if="products.length">
+          <tr v-for="item in products" :key="item.id">
+            <td class="d-none d-md-table-cell align-middle">{{ item.category }}</td>
+            <td class="d-none d-lg-table-cell">
+              <span class="thumbnail"
+               :style="{backgroundImage: 'url(' + item.imageUrl[0] + ')'}"></span>
+            </td>
+            <td class="align-middle">{{ item.title }}</td>
+            <td class="d-none d-lg-table-cell align-middle text-right">
+              {{ item.origin_price | currency }}
+            </td>
+            <td class="d-none d-sm-table-cell align-middle text-right">
+              {{ item.price | currency }}
+            </td>
+            <td class="d-none d-sm-table-cell align-middle">
+              <span class="text-success" v-if="item.enabled">啟用</span>
+              <span class="text-muted" v-else>未啟用</span>
+            </td>
+            <td class="align-middle">
+              <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-dark"
+                 @click.prevent="openModal('update', item)">
+                  編輯
+                </button>
+                <button type="button" class="btn btn-outline-danger"
+                 @click.prevent="openModal('del', item)">
+                  刪除
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- editModal -->
+    <div class="modal fade" id="editModal" role="dialog" aria-labelledby="editModalTitle"
+     aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-light">
+            <h5 class="modal-title" id="editModalTitle">
+              {{ status === 'create' ? '新增產品' : '更新產品' }}
+            </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group" v-for="i in 5" :key="i">
+                    <label :for="'imageUrl' + i">圖片網址：</label>
+                    <input type="text" :id="'imageUrl' + i" class="form-control"
+                     placeholder="請輸入圖片網址" v-model="tempProduct.imageUrl[i-1]" required>
+                  </div>
+                  <div class="form-group">
+                    <p class="mb-2">上傳檔案(不可超過 2 MB)</p>
+                    <div class="custom-file">
+                      <input type="file" class="custom-file-input" id="file" accept="image/*"
+                       ref="file" @change="uploadFile">
+                      <label class="custom-file-label" for="file">選擇檔案</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <label for="title">標題：</label>
+                    <input type="text" id="title" class="form-control" placeholder="請輸入標題"
+                     v-model="tempProduct.title" required>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label for="category">分類：</label>
+                      <input type="text" id="category" class="form-control" placeholder="請輸入分類"
+                       v-model="tempProduct.category" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="unit">單位：</label>
+                      <input type="text" id="unit" class="form-control" placeholder="請輸入單位"
+                       v-model="tempProduct.unit" required>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label for="origin_price">原價：</label>
+                      <input type="number" id="origin_price" class="form-control"
+                       placeholder="請輸入原價" v-model="tempProduct.origin_price" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="price">售價：</label>
+                      <input type="number" id="price" class="form-control" placeholder="請輸入售價"
+                       v-model="tempProduct.price" required>
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="form-group" v-if="tempProduct.options">
+                    <label for="ingredient">產品成分：</label>
+                    <textarea class="form-control" id="ingredient" rows="3" placeholder="請輸入產品成分"
+                     v-model="tempProduct.options.ingredient" require></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="content">產品介紹：</label>
+                    <textarea class="form-control" id="content" rows="3" placeholder="請輸入產品介紹"
+                     v-model="tempProduct.content" require></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="description">產品描述：</label>
+                    <vue-editor id="description" v-model="tempProduct.description"
+                     placeholder="請輸入產品描述"/>
+                  </div>
+                  <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" id="enabled"
+                    v-model="tempProduct.enabled" :true-value="true" :false-value="false">
+                    <label class="form-check-label" for="enabled">是否啟用</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-muted" data-dismiss="modal">取消</button>
+            <button type="submit" class="btn btn-dark" @click.prevent="updateProduct()">
+              確認
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- delModal -->
+    <div class="modal fade" id="delModal" role="dialog" aria-labelledby="delModalTitle"
+     aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-light">
+            <h5 class="modal-title" id="delModalTitle">刪除產品</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            確定要刪除該筆產品 (刪除後無法復原)
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-dark" data-dismiss="modal">
+              取消
+            </button>
+            <button type="button" class="btn btn-outline-danger"
+             @click.prevent="delProduct()">
+              刪除
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </template>
 
 <script>
+/* global $ */
+import { VueEditor } from 'vue2-editor';
+
 export default {
   name: 'ProductsManage',
+  data() {
+    return {
+      isLoading: false,
+      products: [
+        {
+          id: 'a',
+          title: 'product1',
+          category: 'T-Shirts',
+          content: 'T-Shirt1',
+          imageUrl: [
+            'https://images.unsplash.com/photo-1593642532744-d377ab507dc8?ixid=MXwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+          ],
+          enabled: true,
+          origin_price: 680,
+          price: 580,
+          unit: '件',
+          options: {
+            ingredient: '',
+          },
+        },
+        {
+          id: 'b',
+          title: 'product2',
+          category: 'T-Shirts',
+          content: 'T-Shirt2',
+          imageUrl: [
+            'https://images.unsplash.com/photo-1593642532744-d377ab507dc8?ixid=MXwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+          ],
+          enabled: true,
+          origin_price: 300,
+          price: 250,
+          unit: '件',
+          options: {
+            ingredient: '',
+          },
+        },
+      ],
+      tempProduct: {
+        imageUrl: [],
+        options: {
+          ingredient: '',
+        },
+      },
+      status: '',
+    };
+  },
+  methods: {
+    openModal(status, item) {
+      this.status = '';
+      switch (status) {
+        case 'del':
+          this.tempProduct = { ...item };
+          $('#delModal').modal('show');
+          break;
+        case 'update':
+          this.tempProduct = { ...item };
+          this.status = 'update';
+          $('#editModal').modal('show');
+          break;
+        case 'create':
+          this.tempProduct = {
+            imageUrl: [],
+            options: {
+              ingredient: '',
+            },
+          };
+          this.status = 'create';
+          $('#editModal').modal('show');
+          break;
+        default:
+          break;
+      }
+    },
+    updateProduct() {
+      console.log('更新產品');
+      $('#editModal').modal('hide');
+    },
+    delProduct() {
+      console.log('刪除產品');
+      $('#delModal').modal('hide');
+    },
+    uploadFile() {
+      console.log('上傳檔案');
+    },
+  },
+  components: {
+    VueEditor,
+  },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+@import '@/assets/scss/all';
 
+.thumbnail {
+  display: inline-block;
+  width: 5rem;
+  height: 5rem;
+  margin: 0 auto;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 </style>

@@ -17,6 +17,7 @@ import App from './App.vue';
 import router from './router';
 import './bus';
 import store from './store';
+import currencyFilter from './filters/currency';
 
 // jquery 設定
 window.$ = jquery;
@@ -48,6 +49,9 @@ Vue.component('ValidationObserver', ValidationObserver);
 
 // vue-sweetalert2 設定
 Vue.use(VueSweetalert2);
+
+// 引入 filter
+Vue.filter('currency', currencyFilter);
 
 Vue.config.productionTip = false;
 
