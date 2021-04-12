@@ -179,52 +179,22 @@
       </div>
     </div>
 
+    <Pagination :pagination="pagination" @get-data="getProducts"/>
   </div>
 </template>
 
 <script>
 /* global $ */
 import { VueEditor } from 'vue2-editor';
+import Pagination from '@/components/Pagination.vue';
 
 export default {
   name: 'ProductsManage',
   data() {
     return {
       isLoading: false,
-      products: [
-        {
-          id: 'a',
-          title: 'product1',
-          category: 'T-Shirts',
-          content: 'T-Shirt1',
-          imageUrl: [
-            'https://images.unsplash.com/photo-1593642532744-d377ab507dc8?ixid=MXwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-          ],
-          enabled: true,
-          origin_price: 680,
-          price: 580,
-          unit: '件',
-          options: {
-            ingredient: '',
-          },
-        },
-        {
-          id: 'b',
-          title: 'product2',
-          category: 'T-Shirts',
-          content: 'T-Shirt2',
-          imageUrl: [
-            'https://images.unsplash.com/photo-1593642532744-d377ab507dc8?ixid=MXwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-          ],
-          enabled: true,
-          origin_price: 300,
-          price: 250,
-          unit: '件',
-          options: {
-            ingredient: '',
-          },
-        },
-      ],
+      products: [],
+      pagination: {},
       tempProduct: {
         imageUrl: [],
         options: {
@@ -235,6 +205,16 @@ export default {
     };
   },
   methods: {
+    getProducts(page = 1) {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/products?page=${page}&paged=10`;
+      vm.isLoading = true;
+      vm.$http.get(url).then((res) => {
+        vm.products = res.data.data;
+        vm.pagination = res.data.meta.pagination;
+        vm.isLoading = false;
+      });
+    },
     openModal(status, item) {
       this.status = '';
       switch (status) {
@@ -270,11 +250,14 @@ export default {
       $('#delModal').modal('hide');
     },
     uploadFile() {
-      console.log('上傳檔案');
     },
   },
   components: {
     VueEditor,
+    Pagination,
+  },
+  created() {
+    this.getProducts();
   },
 };
 </script>
