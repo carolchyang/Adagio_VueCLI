@@ -278,6 +278,37 @@ export default {
       $('#delModal').modal('hide');
     },
     uploadFile() {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/storage`;
+      const file = vm.$refs.file.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      vm.isLoading = true;
+      vm.$http.post(url, formData, {
+        header: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }).then((res) => {
+        if (res.status === 200) {
+          // 清空空白圖片網址
+          const array = vm.tempProduct.imageUrl.filter((item) => item);
+          array.push(res.data.data.path);
+          vm.tempProduct.imageUrl = array;
+        }
+        vm.isLoading = false;
+        const msg = {
+          icon: 'success',
+          title: '上傳圖檔成功',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      }).catch(() => {
+        vm.isLoading = false;
+        const msg = {
+          icon: 'error',
+          title: '上傳圖檔失敗，請確認檔案大小',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      });
     },
   },
   components: {
