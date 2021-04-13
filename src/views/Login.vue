@@ -58,7 +58,7 @@ export default {
       vm.isLoading = true;
       vm.$http.post(apiUrl, vm.auth).then((res) => {
         const { token, expired } = res.data;
-        document.cookie = `hex=${token}; expries=${new Date(expired * 1000)}; path=/`;
+        document.cookie = `hexToken=${token}; expries=${new Date(expired * 1000)}; path=/`;
         vm.isLoading = false;
         const msg = {
           icon: 'success',
@@ -66,7 +66,7 @@ export default {
         };
         vm.$bus.$emit('alertmessage', msg);
 
-        vm.$router.push('/');
+        vm.$router.push('/admin/productsmanage');
       }).catch(() => {
         vm.isLoading = false;
         const msg = {

@@ -15,6 +15,32 @@ const routes = [
     component: () => import('../views/Login.vue'),
   },
   {
+    path: '/admin',
+    component: () => import('../views/DashboardLayout.vue'),
+    children: [
+      {
+        path: 'productsmanage',
+        name: 'ProductsManage',
+        component: () => import('../views/admin/ProductsManage.vue'),
+      },
+      {
+        path: 'couponsmanage',
+        name: 'CouponsManage',
+        component: () => import('../views/admin/CouponsManage.vue'),
+      },
+      {
+        path: 'ordersmanage',
+        name: 'OrdersManage',
+        component: () => import('../views/admin/OrdersManage.vue'),
+      },
+      {
+        path: 'storagesmanage',
+        name: 'StoragesManage',
+        component: () => import('../views/admin/StoragesManage.vue'),
+      },
+    ],
+  },
+  {
     path: '*',
     redirect: '/',
   },
