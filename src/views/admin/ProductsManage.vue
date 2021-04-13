@@ -89,30 +89,30 @@
                 </div>
                 <div class="col-md-8">
                   <div class="form-group">
-                    <label for="title">標題：</label>
+                    <label for="title"><span class="text-danger">*</span>標題：</label>
                     <input type="text" id="title" class="form-control" placeholder="請輸入標題"
                      v-model="tempProduct.title" required>
                   </div>
                   <div class="form-row">
                     <div class="form-group col-md-6">
-                      <label for="category">分類：</label>
+                      <label for="category"><span class="text-danger">*</span>分類：</label>
                       <input type="text" id="category" class="form-control" placeholder="請輸入分類"
                        v-model="tempProduct.category" required>
                     </div>
                     <div class="form-group col-md-6">
-                      <label for="unit">單位：</label>
+                      <label for="unit"><span class="text-danger">*</span>單位：</label>
                       <input type="text" id="unit" class="form-control" placeholder="請輸入單位"
                        v-model="tempProduct.unit" required>
                     </div>
                   </div>
                   <div class="form-row">
                     <div class="form-group col-md-6">
-                      <label for="origin_price">原價：</label>
+                      <label for="origin_price"><span class="text-danger">*</span>原價：</label>
                       <input type="number" id="origin_price" class="form-control"
                        placeholder="請輸入原價" v-model="tempProduct.origin_price" required>
                     </div>
                     <div class="form-group col-md-6">
-                      <label for="price">售價：</label>
+                      <label for="price"><span class="text-danger">*</span>售價：</label>
                       <input type="number" id="price" class="form-control" placeholder="請輸入售價"
                        v-model="tempProduct.price" required>
                     </div>
@@ -124,12 +124,12 @@
                      v-model="tempProduct.options.ingredient" require></textarea>
                   </div>
                   <div class="form-group">
-                    <label for="content">產品介紹：</label>
+                    <label for="content"><span class="text-danger">*</span>產品介紹：</label>
                     <textarea class="form-control" id="content" rows="3" placeholder="請輸入產品介紹"
                      v-model="tempProduct.content" require></textarea>
                   </div>
                   <div class="form-group">
-                    <label for="description">產品描述：</label>
+                    <label for="description"><span class="text-danger">*</span>產品描述：</label>
                     <vue-editor id="description" v-model="tempProduct.description"
                      placeholder="請輸入產品描述"/>
                   </div>
@@ -274,8 +274,27 @@ export default {
       });
     },
     delProduct() {
-      console.log('刪除產品');
-      $('#delModal').modal('hide');
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/product/${vm.tempProduct.id}`;
+      vm.isLoading = true;
+      vm.$http.delete(url).then(() => {
+        $('#delModal').modal('hide');
+        vm.getProducts();
+        vm.isLoading = false;
+        const msg = {
+          icon: 'success',
+          title: '刪除產品成功',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      }).catch(() => {
+        $('#delModal').modal('hide');
+        vm.isLoading = false;
+        const msg = {
+          icon: 'error',
+          title: '刪除產品失敗',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      });
     },
     uploadFile() {
       const vm = this;
