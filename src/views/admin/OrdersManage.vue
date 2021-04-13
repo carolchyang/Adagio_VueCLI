@@ -1,5 +1,7 @@
 <template>
   <div>
+    <loading :active.sync="isLoading" :is-full-page="true"></loading>
+
     <div class="table-responsive">
       <table class="table">
         <thead>
@@ -52,6 +54,7 @@ export default {
   name: 'OrdersManage',
   data() {
     return {
+      isLoading: false,
       pagination: {},
       orders: {},
     };
@@ -67,7 +70,30 @@ export default {
         vm.isLoading = false;
       });
     },
-    setOrderPaid() {
+    setOrderPaid(item) {
+      const vm = this;
+      let url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/orders/${item.id}/paid`;
+      // 若是未付款
+      if (!item.paid) {
+        url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/orders/${item.id}/unpaid`;
+      }
+      vm.isLoading = true;
+      vm.$http.patch(url, item.id).then(() => {
+        vm.isLoading = false;
+        vm.getOrders();
+        const msg = {
+          icon: 'success',
+          title: '更新成功',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      }).catch(() => {
+        vm.isLoading = false;
+        const msg = {
+          icon: 'error',
+          title: '更新失敗',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      });
     },
   },
   components: {
