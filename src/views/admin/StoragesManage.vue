@@ -76,6 +76,27 @@ export default {
       });
     },
     delStorage() {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/storage/${vm.tempStorage.id}`;
+      vm.isLoading = true;
+      vm.$http.delete(url).then(() => {
+        $('#delModal').modal('hide');
+        vm.isLoading = false;
+        vm.getStorages();
+        const msg = {
+          icon: 'success',
+          title: '刪除圖片成功',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      }).catch(() => {
+        $('#delModal').modal('hide');
+        vm.isLoading = false;
+        const msg = {
+          icon: 'error',
+          title: '刪除圖片失敗',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      });
     },
     openDelModal(item) {
       $('#delModal').modal('show');
