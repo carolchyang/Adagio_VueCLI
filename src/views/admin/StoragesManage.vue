@@ -65,7 +65,15 @@ export default {
     };
   },
   methods: {
-    getStorages() {
+    getStorages(page = 1) {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/storage?page=${page}&paged=6`;
+      vm.isLoading = true;
+      vm.$http.get(url).then((res) => {
+        vm.storages = res.data.data;
+        vm.pagination = res.data.meta.pagination;
+        vm.isLoading = false;
+      });
     },
     delStorage() {
     },
@@ -76,6 +84,9 @@ export default {
   },
   components: {
     Pagination,
+  },
+  created() {
+    this.getStorages();
   },
 };
 </script>
