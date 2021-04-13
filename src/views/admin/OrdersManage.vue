@@ -57,13 +57,24 @@ export default {
     };
   },
   methods: {
-    getOrders() {
+    getOrders(page = 1) {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/orders?page=${page}`;
+      vm.isLoading = true;
+      vm.$http.get(url).then((res) => {
+        vm.orders = res.data.data;
+        vm.pagination = res.data.meta.pagination;
+        vm.isLoading = false;
+      });
     },
     setOrderPaid() {
     },
   },
   components: {
     Pagination,
+  },
+  created() {
+    this.getOrders();
   },
 };
 </script>
