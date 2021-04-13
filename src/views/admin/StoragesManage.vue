@@ -1,5 +1,6 @@
 <template>
     <div class="container-fluid">
+    <loading :active.sync="isLoading" :is-full-page="true"></loading>
 
     <div class="row">
       <div class="col-12 col-lg-6 col-xl-4" v-for="item in storages" :key="item.id">
@@ -59,6 +60,7 @@ export default {
   name: 'StoragesManage',
   data() {
     return {
+      isLoading: false,
       pagination: {},
       storages: {},
       tempStorage: {},
