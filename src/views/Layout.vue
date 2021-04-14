@@ -1,5 +1,6 @@
 <template>
   <div>
+    <AlertMessage/>
     <loading :active.sync="isLoading" :is-full-page="true"></loading>
 
     <div class="header-wrap">
@@ -135,6 +136,8 @@
 </template>
 
 <script>
+import AlertMessage from '@/components/AlertMessage.vue';
+
 export default {
   name: 'Layout',
   data() {
@@ -162,7 +165,26 @@ export default {
         vm.isLoading = false;
       });
     },
-    delCartItem() {
+    delCartItem(id) {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping/${id}`;
+      vm.isLoading = true;
+      vm.$http.delete(url, { product: id }).then(() => {
+        vm.isLoading = false;
+        vm.getCarts();
+        const msg = {
+          icon: 'success',
+          title: '已刪除此筆資料',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      }).catch(() => {
+        vm.isLoading = false;
+        const msg = {
+          icon: 'error',
+          title: '刪除購物車失敗',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      });
     },
     getFavfoites() {
     },
@@ -170,6 +192,9 @@ export default {
     },
     delFavoriteAll() {
     },
+  },
+  components: {
+    AlertMessage,
   },
   created() {
     this.getCarts();
