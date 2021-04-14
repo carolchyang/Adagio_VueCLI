@@ -149,6 +149,18 @@ export default {
   },
   methods: {
     getCarts() {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
+      vm.isLoading = false;
+      vm.$http.get(url).then((res) => {
+        let num = 0;
+        vm.carts = res.data.data;
+        vm.carts.forEach((item) => {
+          num += item.quantity;
+        });
+        vm.cartsNum = num;
+        vm.isLoading = false;
+      });
     },
     delCartItem() {
     },
@@ -158,6 +170,9 @@ export default {
     },
     delFavoriteAll() {
     },
+  },
+  created() {
+    this.getCarts();
   },
 };
 </script>
