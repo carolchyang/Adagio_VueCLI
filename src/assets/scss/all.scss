@@ -14,7 +14,40 @@ $font-logo: 'Kaushan Script', cursive;
   font-size: 1.5rem;
 }
 
-.main {
-  min-height: calc( 100vh - 48px);
-  padding-top: 56px;
+.pagebanner {
+  padding: 11rem 0 8rem;
+  background-size: cover;
+  background-position: 50%;
+  background-repeat: no-repeat;
+  transition: 0.5s all ease;
+  text-align: center;
+  color: $white;
+  h2{
+    display:inline-block;
+    margin-bottom:0;
+    padding:1rem 5rem;
+    background-color:rgba(52,58,64,.8);
+    border-radius:.25rem;
+    font-size:1.5rem
+  }
+}
+
+//favorite-icon
+
+.favorite-icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: .25rem 1rem;
+  transition: all .3s ease;
+  color: $danger;
+  font-size: 1.75rem;
+  &:hover {
+    transform: scale(1.2);
+    color: $danger;
+  }
+}
+
+.favorite-icon-lg {
+  font-size: 2rem;
 }
