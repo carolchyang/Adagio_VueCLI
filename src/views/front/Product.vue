@@ -50,12 +50,12 @@
             </ul>
             <div class="product-cart">
               <div class="counter">
-                <a href="#" class="lessNum">
+                <a href="#" class="lessNum" @click.prevent="lessNum()">
                   <i class="fas fa-minus"></i>
                 </a>
                 <input type="number" min="1" readonly="readonly" class="counter-input"
                  v-model="counterNum">
-                <a href="#" class="addNum">
+                <a href="#" class="addNum" @click.prevent="counterNum += 1">
                   <i class="fas fa-plus"></i>
                 </a>
               </div>
@@ -209,7 +209,7 @@ export default {
           categoryImg: categoryImgDrinks,
         },
       ],
-      counterNum: 0,
+      counterNum: 1,
       swiperOption: {
         slidesPerView: 1,
         spaceBetween: 30,
@@ -234,6 +234,18 @@ export default {
         },
       },
     };
+  },
+  methods: {
+    lessNum() {
+      switch (true) {
+        case this.counterNum > 2:
+          this.counterNum -= 1;
+          break;
+        default:
+          this.counterNum = 1;
+          break;
+      }
+    },
   },
   components: {
     Swiper,
