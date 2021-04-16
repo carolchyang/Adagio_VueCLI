@@ -1,5 +1,7 @@
 <template>
   <div class="product">
+    <loading :active.sync="isLoading" :is-full-page="true"></loading>
+
     <div class="pagebanner" :style="{backgroundImage: 'url(' + categoryImg + ')'}">
       <h2>{{ product.category }}</h2>
     </div>
@@ -106,33 +108,8 @@ export default {
   name: 'Product',
   data() {
     return {
-      product: {
-        id: '2iLSi2kbqs72XKbTMKs6X3yJcyGqMptMjiJj653osYlxeDvlW5Fh2OqfCi2Wz0OJ',
-        title: '西班牙焗烤蝦套餐',
-        category: '主餐',
-        content: '使用進口西班牙香料加入米飯，製作而成的黃色烤飯，配上焗烤大蝦，箇中滋味唯有親自品嚐才知道！',
-        description: '<p>使用進口西班牙香料加入米飯，製作而成的黃色烤飯，配上焗烤大蝦，箇中滋味唯有親自品嚐才知道！</p>',
-        imageUrl: [
-          'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/Xgqp5VvHrlsdOUbVeUDs2zjy1nSkVUEzLfW82SVFBOYp7Tj89BGh7DCHiYdKJkrr0HUsZvxXpNN4PUta4ioTXl6qLXyc9MDzHaD1bBIE2eVU3uc6fBlgb3uvgTQa4hdP.jpg',
-        ],
-        enabled: true,
-        origin_price: 800,
-        price: 750,
-        unit: '份',
-        created: {
-          diff: '7個月前',
-          datetime: '2020-09-16 08:09:29',
-          timestamp: 1600214969,
-        },
-        updated: {
-          diff: '7個月前',
-          datetime: '2020-09-16 12:11:59',
-          timestamp: 1600229519,
-        },
-        options: {
-          ingredient: '西班牙米、蝦、薑黃粉、紅椒原粒、起司絲、義式香料',
-        },
-      },
+      isLoading: false,
+      product: {},
       relatedProducts: [
         {
           id: 'WkNnSAFsYZiVye4acw3iHfNRrCYjpGY53Qq8sc2PE5hty8e34tysgECWbNz4zkqX',
@@ -246,10 +223,42 @@ export default {
           break;
       }
     },
+    getProduct(productId) {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/product/${productId}`;
+      vm.isLoading = true;
+      vm.$http.get(url).then((res) => {
+        vm.product = res.data.data;
+        const categoryName = res.data.data.category;
+        vm.categories.forEach((item, index) => {
+          if (item.title === categoryName) {
+            vm.categoryImg = vm.categories[index].categoryImg;
+          }
+        });
+        vm.isLoading = false;
+      }).catch(() => {
+        vm.isLoading = false;
+        vm.$swal({
+          title: '錯誤',
+          text: '找不到此商品，將返回商品頁',
+          confirmButtonColor: '#dc3545',
+          confirmButtonText: '確認',
+          customClass: {
+            title: 'swal-title swal-title-danger',
+          },
+        }).then(() => {
+          vm.$router.push('/products');
+        });
+      });
+    },
   },
   components: {
     Swiper,
     SwiperSlide,
+  },
+  created() {
+    const { productId } = this.$route.params;
+    this.getProduct(productId);
   },
 };
 </script>
