@@ -102,74 +102,25 @@
 </template>
 
 <script>
-import { Swiper, SwiperSlide } from 'vue-awesome-swiper';
-import 'swiper/css/swiper.css';
-
 import categoryImgAllmenu from '@/assets/images/banner-allmenu.jpg';
 import categoryImgMaintmeal from '@/assets/images/banner-mainmeal.jpg';
 import categoryImgLightmeal from '@/assets/images/banner-lightmeal.jpg';
 import categoryImgDessert from '@/assets/images/banner-dessert.jpg';
 import categoryImgDrinks from '@/assets/images/banner-drinks.jpg';
 
+import { Swiper, SwiperSlide } from 'vue-awesome-swiper';
+import 'swiper/css/swiper.css';
+
 export default {
   name: 'Product',
   data() {
     return {
       isLoading: false,
-      product: {},
-      relatedProducts: [
-        {
-          id: 'WkNnSAFsYZiVye4acw3iHfNRrCYjpGY53Qq8sc2PE5hty8e34tysgECWbNz4zkqX',
-          title: '精選小羊排',
-          category: '主餐',
-          content: '特別嚴選的羊小排，使用獨家配方醃製，肉質鮮嫩多汁，保證讓您垂涎欲滴。',
-          imageUrl: [
-            'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/lRexmdNb7cBQLXrhUkO4M14oXaFQco1fSg0OWEHKLO5jQxGnF92tyYMEyO9phJcDtZwcxa8lpED3EvcCIaTm19HDDIDh0VIR5EvIHXleWUbWVaJnSrQdVRRQtbMwUPlB.jpg',
-            null,
-          ],
-          enabled: true,
-          origin_price: 700,
-          price: 700,
-          unit: '份',
-          options: {
-            ingredient: '羊排、薯條、玉米片、義式香料、洋蔥、番茄',
-          },
-        },
-        {
-          id: 'akApjvnRxJ6Rfnx6WhvM1bsbii4BMohVqtbJ228jDvv0RTfqBnffFaIWvQIdCICh',
-          title: '義士燻雞披薩',
-          category: '主餐',
-          content: '特選煙燻雞絲，加上鳳梨、洋蔥、起司，烘焙出美味披薩。',
-          imageUrl: [
-            'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/4dZZSxR5v4Rm1VMzDjFfFz26MLuO6PdN4vOpPeHTAB7BrGilrHEcqOLjj7RS0XQgoOUqYmkwP1xfrb4ot2CoIM3wufkMhm0iRyx13JMmKFjcUJlfqg2UdyYImoH6L7oH.jpg',
-            null,
-          ],
-          enabled: true,
-          origin_price: 700,
-          price: 650,
-          unit: '份',
-          options: {
-            ingredient: '燻雞、麵粉、鳳梨、起司、燻雞、洋蔥、香菜、番茄醬',
-          },
-        },
-        {
-          id: 'nr1v272FfwWQRaVJYorcIEnhEiH4kSvY82ouo5SejPNgbLEqI7lAnnfuXbmIYXmB',
-          title: '煙燻火腿潛艇堡',
-          category: '主餐',
-          content: '在新鮮出爐的麵包裡夾入義式煙燻火腿及生菜，是最熱銷的一款潛艇堡，是絕不容錯過的選擇。',
-          imageUrl: [
-            'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/b7CyKWJjFLplYYoi5ju3R6CDzaG5exT8LTqKpFUCj01AWcfvBn7QIG5gwOGn4Gsp32APRpiDfztfvAi6Ro7hoYIMhd7LIT8Ed4imKlrAbNZTBC8E85XjPzQHdh9Ggz5m.jpg',
-            null,
-          ],
-          enabled: true,
-          origin_price: 350,
-          price: 300,
-          unit: '份',
-          options: {
-            ingredient: '麵粉、糖、鹽、酵母、煙燻火腿、番茄、洋蔥、生菜、起司片',
-          },
-        },
-      ],
+      counterNum: 1,
+      product: [],
+      products: [],
+      carts: [],
+      favorites: [],
       categoryImg: categoryImgAllmenu,
       categories: [
         {
@@ -193,9 +144,6 @@ export default {
           categoryImg: categoryImgDrinks,
         },
       ],
-      counterNum: 1,
-      carts: [],
-      favorites: [],
       swiperOption: {
         slidesPerView: 1,
         spaceBetween: 30,
@@ -235,8 +183,18 @@ export default {
     getData() {
       const { productId } = this.$route.params;
       this.getProduct(productId);
+      this.getProducts();
       this.getCarts();
       this.getFavorites();
+    },
+    getProducts() {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/products`;
+      vm.isLoading = true;
+      vm.$http.get(url).then((res) => {
+        vm.products = res.data.data;
+        vm.isLoading = false;
+      });
     },
     getProduct(productId) {
       const vm = this;
@@ -361,6 +319,10 @@ export default {
         }
       });
       return isFavorite;
+    },
+    relatedProducts() {
+      return this.products.filter((item) => item.category === this
+        .product.category && item.id !== this.product.id);
     },
   },
   components: {
