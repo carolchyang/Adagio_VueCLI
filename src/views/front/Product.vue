@@ -29,11 +29,15 @@
         <div class="col-12 col-md-6  mb-4 mb-md-0">
           <div class="cover" v-if="product.imageUrl">
             <div class="cover-img" :style="{backgroundImage: 'url(' + product.imageUrl[0] + ')'}">
-              <a href="#" class="favorite-icon favorite-icon-lg">
+              <a href="#" class="favorite-icon favorite-icon-lg"
+               @click.prevent="delFavoriteItem(product)"
+                v-show="isFavorite">
                 <i class="fas fa-heart"></i>
 
               </a>
-              <a href="#" class="favorite-icon favorite-icon-lg">
+              <a href="#" class="favorite-icon favorite-icon-lg"
+               @click.prevent="addFavorite(product)"
+                v-show="!isFavorite">
                 <i class="far fa-heart"></i>
               </a>
             </div>
@@ -187,6 +191,7 @@ export default {
         },
       ],
       counterNum: 1,
+      favorites: [],
       swiperOption: {
         slidesPerView: 1,
         spaceBetween: 30,
@@ -223,6 +228,11 @@ export default {
           break;
       }
     },
+    getData() {
+      const { productId } = this.$route.params;
+      this.getProduct(productId);
+      this.getFavorites();
+    },
     getProduct(productId) {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/product/${productId}`;
@@ -251,14 +261,59 @@ export default {
         });
       });
     },
+    getFavorites() {
+      const favoriteData = JSON.parse(localStorage.getItem('favoriteData')) || [];
+      this.favorites = favoriteData;
+    },
+    addFavorite(product) {
+      const vm = this;
+      const favoriteData = {
+        id: product.id,
+        title: product.title,
+        imageUrl: product.imageUrl[0],
+      };
+      vm.favorites.push(favoriteData);
+      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
+      vm.getFavorites();
+      const msg = {
+        icon: 'success',
+        title: '已加入我的最愛',
+      };
+      vm.$bus.$emit('alertmessage', msg);
+    },
+    delFavoriteItem(product) {
+      const vm = this;
+      vm.favorites.forEach((item, index) => {
+        if (item.id === product.id) {
+          this.favorites.splice(index, 1);
+        }
+      });
+      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
+      vm.getFavorites();
+      const msg = {
+        icon: 'success',
+        title: '已刪除我的最愛',
+      };
+      vm.$bus.$emit('alertmessage', msg);
+    },
+  },
+  computed: {
+    isFavorite() {
+      let isFavorite = false;
+      this.favorites.forEach((favoriteItem) => {
+        if (this.product.id === favoriteItem.id) {
+          isFavorite = true;
+        }
+      });
+      return isFavorite;
+    },
   },
   components: {
     Swiper,
     SwiperSlide,
   },
   created() {
-    const { productId } = this.$route.params;
-    this.getProduct(productId);
+    this.getData();
   },
 };
 </script>
