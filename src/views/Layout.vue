@@ -127,7 +127,7 @@
       </div>
     </div>
 
-    <router-view :key="$route.fullPath"></router-view>
+    <router-view></router-view>
 
     <div class="footer">
       ⓒ 2020 Adagio by Carol
@@ -186,11 +186,50 @@ export default {
         vm.$bus.$emit('alertmessage', msg);
       });
     },
-    getFavfoites() {
+    getFavorites() {
+      const favoriteData = JSON.parse(localStorage.getItem('favoriteData')) || [];
+      this.favorites = favoriteData;
+      this.favoritesNum = favoriteData.length;
     },
-    delFavoriteItem() {
+    delFavoriteItem(product) {
+      const vm = this;
+      vm.favorites.forEach((item, index) => {
+        if (item.id === product.id) {
+          this.favorites.splice(index, 1);
+        }
+      });
+      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
+      vm.getFavorites();
+      const msg = {
+        icon: 'success',
+        title: '已刪除我的最愛',
+      };
+      vm.$bus.$emit('alertmessage', msg);
     },
     delFavoriteAll() {
+      const vm = this;
+      vm.$swal({
+        title: '刪除我的最愛',
+        text: '確定要刪除全部我的最愛 (刪除後無法復原)',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#343a40',
+        confirmButtonText: '確認',
+        cancelButtonText: '取消',
+        customClass: {
+          title: 'swal-title swal-title-danger',
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          localStorage.removeItem('favoriteData');
+          vm.getFavorites();
+          const msg = {
+            icon: 'success',
+            title: '已刪除全部我的最愛',
+          };
+          vm.$bus.$emit('alertmessage', msg);
+        }
+      });
     },
   },
   components: {
@@ -198,6 +237,7 @@ export default {
   },
   created() {
     this.getCarts();
+    this.getFavorites();
   },
 };
 </script>
