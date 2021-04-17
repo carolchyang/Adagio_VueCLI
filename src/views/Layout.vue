@@ -127,7 +127,8 @@
       </div>
     </div>
 
-    <router-view></router-view>
+    <router-view @get-carts="getCarts" @get-favorites="getFavorites" :key="$route.fullPath"
+     ref="view"></router-view>
 
     <div class="footer">
       ⓒ 2020 Adagio by Carol
@@ -171,12 +172,18 @@ export default {
       vm.isLoading = true;
       vm.$http.delete(url, { product: id }).then(() => {
         vm.isLoading = false;
-        vm.getCarts();
         const msg = {
           icon: 'success',
           title: '已刪除此筆資料',
         };
         vm.$bus.$emit('alertmessage', msg);
+        vm.getCarts();
+
+        // 若在 Product 頁則重整內頁購物車
+        const routerName = vm.$refs.view.$route.name;
+        if (routerName === 'Product') {
+          vm.$refs.view.getCarts();
+        }
       }).catch(() => {
         vm.isLoading = false;
         const msg = {
@@ -187,9 +194,10 @@ export default {
       });
     },
     getFavorites() {
+      const vm = this;
       const favoriteData = JSON.parse(localStorage.getItem('favoriteData')) || [];
-      this.favorites = favoriteData;
-      this.favoritesNum = favoriteData.length;
+      vm.favorites = favoriteData;
+      vm.favoritesNum = favoriteData.length;
     },
     delFavoriteItem(product) {
       const vm = this;
@@ -199,12 +207,18 @@ export default {
         }
       });
       localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
-      vm.getFavorites();
       const msg = {
         icon: 'success',
         title: '已刪除我的最愛',
       };
       vm.$bus.$emit('alertmessage', msg);
+      vm.getFavorites();
+
+      // 若在 Product 頁則重整內頁我的最愛
+      const routerName = vm.$refs.view.$route.name;
+      if (routerName === 'Product') {
+        vm.$refs.view.getFavorites();
+      }
     },
     delFavoriteAll() {
       const vm = this;
@@ -222,12 +236,18 @@ export default {
       }).then((result) => {
         if (result.isConfirmed) {
           localStorage.removeItem('favoriteData');
-          vm.getFavorites();
           const msg = {
             icon: 'success',
             title: '已刪除全部我的最愛',
           };
           vm.$bus.$emit('alertmessage', msg);
+          vm.getFavorites();
+
+          // 若在 Product 頁則重整內頁我的最愛
+          const routerName = vm.$refs.view.$route.name;
+          if (routerName === 'Product') {
+            vm.$refs.view.getFavorites();
+          }
         }
       });
     },

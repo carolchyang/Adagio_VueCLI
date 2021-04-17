@@ -295,6 +295,8 @@ export default {
       vm.isLoading = true;
       vm.$http[method](url, data).then(() => {
         vm.getCarts();
+        vm.$emit('get-carts');
+
         vm.isLoading = false;
         const msg = {
           icon: 'success',
@@ -324,6 +326,8 @@ export default {
       vm.favorites.push(favoriteData);
       localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
       vm.getFavorites();
+      vm.$emit('get-favorites');
+
       const msg = {
         icon: 'success',
         title: '已加入我的最愛',
@@ -339,6 +343,8 @@ export default {
       });
       localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
       vm.getFavorites();
+      vm.$emit('get-favorites');
+
       const msg = {
         icon: 'success',
         title: '已刪除我的最愛',
