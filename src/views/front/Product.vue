@@ -56,17 +56,20 @@
             </ul>
             <div class="product-cart">
               <div class="counter">
-                <a href="#" class="lessNum" @click.prevent="lessNum()">
+                <a href="#" class="lessNum"
+                 @click.prevent="lessNum()">
                   <i class="fas fa-minus"></i>
                 </a>
                 <input type="number" min="1" readonly="readonly" class="counter-input"
                  v-model="counterNum">
-                <a href="#" class="addNum" @click.prevent="counterNum += 1">
+                <a href="#" class="addNum"
+                 @click.prevent="counterNum += 1">
                   <i class="fas fa-plus"></i>
                 </a>
               </div>
 
-              <a href="#" class="btn btn-dark">
+              <a href="#" class="btn btn-dark"
+               @click.prevent="updateCartItem(product.id, counterNum)">
                 <span class="mr-1">
                   <i class="fas fa-shopping-basket"></i>
                 </span>
@@ -191,6 +194,7 @@ export default {
         },
       ],
       counterNum: 1,
+      carts: [],
       favorites: [],
       swiperOption: {
         slidesPerView: 1,
@@ -231,6 +235,7 @@ export default {
     getData() {
       const { productId } = this.$route.params;
       this.getProduct(productId);
+      this.getCarts();
       this.getFavorites();
     },
     getProduct(productId) {
@@ -259,6 +264,50 @@ export default {
         }).then(() => {
           vm.$router.push('/products');
         });
+      });
+    },
+    getCarts() {
+      const vm = this;
+      vm.isLoading = true;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
+      vm.isLoading = true;
+      vm.$http.get(url).then((res) => {
+        vm.carts = res.data.data;
+        vm.isLoading = false;
+      });
+    },
+    updateCartItem(id, num) {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
+      let n = Number(num);
+      let method = 'post';
+      const isInCart = vm.carts.filter((item) => item.product.id === id);
+
+      if (isInCart.length > 0) {
+        method = 'patch';
+        n = Number(isInCart[0].quantity) + Number(num);
+      }
+      const data = {
+        product: id,
+        quantity: n,
+      };
+
+      vm.isLoading = true;
+      vm.$http[method](url, data).then(() => {
+        vm.getCarts();
+        vm.isLoading = false;
+        const msg = {
+          icon: 'success',
+          title: '更新購物車成功',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      }).catch(() => {
+        vm.isLoading = false;
+        const msg = {
+          icon: 'error',
+          title: '更新購物車失敗',
+        };
+        vm.$bus.$emit('alertmessage', msg);
       });
     },
     getFavorites() {
