@@ -11,6 +11,7 @@ import { email, required } from 'vee-validate/dist/rules';
 import 'vue-loading-overlay/dist/vue-loading.css';
 import TW from 'vee-validate/dist/locale/zh_TW.json';
 import VueSweetalert2 from 'vue-sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
