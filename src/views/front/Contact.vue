@@ -16,59 +16,65 @@
           星號 * 為必填欄位
         </p>
       </div>
-      <form class="contact-form" @submit.prevent="sendMessage()">
-        <div class="form-group">
+      <ValidationObserver class="contact-form" v-slot="{ invalid }" tag="form"
+        @submit.prevent="sendMessage()">
+
+        <ValidationProvider class="form-group row" name="姓名" rules="required" tag="div"
+          v-slot="{ errors, classes }">
           <label for="name" class="col-sm-2 col-form-label">
             <span class="text-danger">*</span>
             姓名
           </label>
           <div class="col-sm-10">
             <input type="text" id="name" class="form-control" placeholder="請輸入姓名"
-             v-model="tempData.name" required>
-            <span class="invalid-feedback"></span>
+              :class="classes" v-model="tempData.name" required>
+            <span class="invalid-feedback">{{ errors[0] }}</span>
           </div>
-        </div>
+        </ValidationProvider>
 
-        <div class="form-group">
-        <label for="tel" class="col-sm-2 col-form-label">
+        <ValidationProvider class="form-group row" name="電話" rules="required" tag="div"
+          v-slot="{ errors, classes }">
+          <label for="tel" class="col-sm-2 col-form-label">
             <span class="text-danger">*</span>
             電話
           </label>
           <div class="col-sm-10">
             <input type="text" id="tel" class="form-control" placeholder="請輸入電話"
-             v-model="tempData.tel" required>
-            <span class="invalid-feedback"></span>
+              :class="classes" v-model="tempData.tel" required>
+            <span class="invalid-feedback">{{ errors[0] }}</span>
           </div>
-        </div>
+        </ValidationProvider>
 
-        <div class="form-group">
+        <ValidationProvider class="form-group row" name="電子郵件" rules="required|email" tag="div"
+          v-slot="{ errors, classes }">
           <label for="email" class="col-sm-2 col-form-label">
             <span class="text-danger">*</span>
             電子郵件
           </label>
           <div class="col-sm-10">
             <input type="email" id="email" class="form-control" placeholder="請輸入電子郵件"
-             v-model="tempData.email" required>
-            <span class="invalid-feedback"></span>
+              :class="classes" v-model="tempData.email" required>
+            <span class="invalid-feedback">{{ errors[0] }}</span>
           </div>
-        </div>
+        </ValidationProvider>
 
-        <div class="form-group">
+        <ValidationProvider class="form-group row" name="留言" rules="required" tag="div"
+          v-slot="{ errors, classes }">
           <label for="message" class="col-sm-2 col-form-label">
             <span class="text-danger">*</span>
             留言
           </label>
           <div class="col-sm-10">
             <textarea class="form-control" id="message" rows="3" placeholder="留言給我們"
-             v-model="tempData.message" required></textarea>
-            <span class="invalid-feedback"></span>
+              :class="classes" v-model="tempData.message" required></textarea>
+            <span class="invalid-feedback">{{ errors[0] }}</span>
           </div>
-        </div>
+        </ValidationProvider>
 
         <div class="text-center">
-          <button type="submit" class="btn btn-dark btn-lg">送出</button>
+          <button type="submit" class="btn btn-dark btn-lg" :disabled="invalid">送出</button>
         </div>
-      </form>
+      </ValidationObserver>
     </div>
 
     <div class="contact contact-connection">
