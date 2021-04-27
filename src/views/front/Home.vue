@@ -14,7 +14,7 @@
         </router-link>
       </div>
       <div class="banner-rect"></div>
-      <a class="banner-scroll">
+      <a class="banner-scroll" href="#banner" @click.prevent="scrollDown()">
         <img src="../../assets/images/scroll.gif" class="img-fluid">
       </a>
     </div>
@@ -124,6 +124,7 @@
 </template>
 
 <script>
+/* global $ */
 import { Swiper, SwiperSlide } from 'vue-awesome-swiper';
 import 'swiper/css/swiper.css';
 
@@ -161,6 +162,16 @@ export default {
         },
       ],
     };
+  },
+  methods: {
+    scrollDown() {
+      const target = $('.banner-scroll').attr('href');
+      const targetPos = $(target).offset().top;
+      const targetHeigh = $(target).height();
+      $('html,body').animate({
+        scrollTop: targetHeigh + targetPos,
+      }, 1000);
+    },
   },
   components: {
     Swiper,
