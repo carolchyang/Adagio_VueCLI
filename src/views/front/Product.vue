@@ -466,7 +466,20 @@ export default {
   border-radius: 0 0.25rem 0.25rem 0;
 }
 
-// swiper 設定
+.product-subtitle {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid $dark;
+  text-align: left;
+  font-size: 1.25rem;
+}
+
+.product-text {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0;
+  text-align: left;
+  line-height: 1.75;
+}
 
 .swiper-title {
   margin-bottom: 0.5rem;
