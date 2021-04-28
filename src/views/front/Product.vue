@@ -181,7 +181,6 @@ export default {
     ...mapGetters('cartModules', ['carts']),
     ...mapGetters('favoriteModules', ['favorites']),
     ...mapGetters('productsModules', ['products', 'product', 'categories', 'categoryImg']),
-
   },
   components: {
     Swiper,

@@ -49,7 +49,7 @@
                 <div class="counter">
                   <a href="#" class="lessNum"
                    @click.prevent="
-                   updateCartItem(cart.product.id, cart.quantity - 1)"
+                   updateCartItem(cart.product.id, cart.quantity - 1, $event)"
                   >
                     <i class="fas fa-minus"></i>
                   </a>
@@ -57,7 +57,7 @@
                    :value="cart.quantity" class="counter-input">
                   <a href="#" class="addNum"
                    @click.prevent="
-                   updateCartItem(cart.product.id, cart.quantity + 1)"
+                   updateCartItem(cart.product.id, cart.quantity + 1, $event)"
                   >
                     <i class="fas fa-plus"></i>
                   </a>
@@ -350,7 +350,7 @@ export default {
           text: '請輸入折價劵代碼',
           status: 'danger',
         };
-        this.$store.dispatch('alertMessageModules/openModal', msg);
+        vm.$store.dispatch('alertMessageModules/openModal', msg);
         return;
       }
 
@@ -361,7 +361,7 @@ export default {
           icon: 'success',
           title: '已成功使用此 Coupon 券',
         };
-        this.$store.dispatch('alertMessageModules/openToast', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
 
         vm.couponInput = '';
         vm.$store.dispatch('updateLoading', false, { root: true });
@@ -370,7 +370,7 @@ export default {
           icon: 'error',
           title: '出錯了~ 此 Coupon 券無效',
         };
-        this.$store.dispatch('alertMessageModules/openToast', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
         vm.$store.dispatch('updateLoading', false, { root: true });
       });
     },

@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 
 import alertMessageModules from './modules/alertMessage';
+import paginationModules from './modules/pagination';
 import cartModules from './modules/cart';
 import favoriteModules from './modules/favorite';
 import productsModules from './modules/products';
@@ -28,6 +29,7 @@ export default new Vuex.Store({
   },
   modules: {
     alertMessageModules,
+    paginationModules,
     cartModules,
     productsModules,
     favoriteModules,

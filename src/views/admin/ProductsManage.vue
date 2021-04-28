@@ -177,7 +177,7 @@
       </div>
     </div>
 
-    <Pagination :pagination="pagination" @get-data="getProducts"/>
+    <Pagination @get-data="getProducts"/>
   </div>
 </template>
 
@@ -191,7 +191,6 @@ export default {
   name: 'ProductsManage',
   data() {
     return {
-      pagination: {},
       tempProduct: {
         imageUrl: [],
         options: {
@@ -206,7 +205,7 @@ export default {
       const routerName = this.$route.name;
       this.$store.dispatch('productsModules/getProducts', { routerName, page })
         .then((res) => {
-          this.pagination = res.data.meta.pagination;
+          this.$store.dispatch('paginationModules/getPagination', { routerName, data: res.data }, { root: true });
         });
     },
     openModal(status, item) {
@@ -298,7 +297,7 @@ export default {
       formData.append('file', file);
       vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.post(url, formData, {
-        header: {
+        headers: {
           'Content-Type': 'multipart/form-data',
         },
       }).then((res) => {

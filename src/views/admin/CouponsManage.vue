@@ -128,7 +128,7 @@
       </div>
     </div>
 
-    <Pagination :pagination="pagination" @get-data="getCoupons"/>
+    <Pagination @get-data="getCoupons"/>
   </div>
 </template>
 
@@ -141,7 +141,6 @@ export default {
   name: 'CouponsManage',
   data() {
     return {
-      pagination: {},
       coupons: {},
       tempCoupon: {
         title: '',
@@ -164,7 +163,7 @@ export default {
       vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.get(url).then((res) => {
         vm.coupons = res.data.data;
-        vm.pagination = res.data.meta.pagination;
+        vm.$store.dispatch('paginationModules/getPagination', { routerName: this.$route.name, data: res.data });
         vm.$store.dispatch('updateLoading', false, { root: true });
       });
     },
@@ -199,13 +198,11 @@ export default {
       let status = '新增';
       vm.tempCoupon.deadline_at = dayjs(vm.deadline.time).format('YYYY-MM-DD HH:mm:ss');
       let url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/coupon`;
-
       if (vm.status === 'update') {
         method = 'patch';
         status = '更新';
         url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/coupon/${vm.tempCoupon.id}`;
       }
-
       vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http[method](url, vm.tempCoupon).then(() => {
         vm.$store.dispatch('updateLoading', false, { root: true });
@@ -257,6 +254,6 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/scss/all';
 </style>

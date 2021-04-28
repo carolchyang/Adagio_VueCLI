@@ -41,7 +41,7 @@
       </table>
     </div>
 
-    <Pagination :pagination="pagination" @get-data="getOrders"/>
+    <Pagination @get-data="getOrders"/>
   </div>
 </template>
 
@@ -63,7 +63,7 @@ export default {
       vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.get(url).then((res) => {
         vm.orders = res.data.data;
-        vm.pagination = res.data.meta.pagination;
+        vm.$store.dispatch('paginationModules/getPagination', { routerName: this.$route.name, data: res.data });
         vm.$store.dispatch('updateLoading', false, { root: true });
       });
     },
@@ -102,6 +102,6 @@ export default {
 };
 </script>
 
-<style lang="scss">
-
+<style lang="scss" scoped>
+@import '@/assets/scss/all';
 </style>

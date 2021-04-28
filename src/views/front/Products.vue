@@ -90,7 +90,7 @@
           </div>
 
           <div class="products-pagination">
-            <Pagination :pagination="pagination" @get-data="changePage"/>
+            <Pagination @get-data="changePage"/>
           </div>
         </div>
 
@@ -108,14 +108,6 @@ export default {
   name: 'Products',
   data() {
     return {
-      // 頁碼相關
-      currentPage: 1, // 所在頁面
-      pagination: {
-        perpage: 6, // 一面有幾個商品
-        result_length: 0, // 商品數量
-        total_pages: 1, // 總共有幾頁
-        current_page: 1, // 所在頁面
-      },
       searchText: '',
       filterText: '',
       filterCategory: '全部',
@@ -133,14 +125,7 @@ export default {
           if (categoryName) {
             this.getCategory({ title: categoryName });
           } else {
-            // 設定預設頁碼
-            const resultLen = this.products.length;
-            this.pagination = {
-              perpage: 6, // 一面有幾個商品
-              result_length: resultLen,
-              total_pages: Math.ceil(resultLen / Number(this.pagination.perpage)),
-              current_page: 1,
-            };
+            this.$store.dispatch('paginationModules/getPagination', { routerName: this.$route.name, data: this.products });
           }
         });
     },
@@ -164,28 +149,12 @@ export default {
       vm.$store.dispatch('productsModules/updateCategoryImg', vm.filterCategory);
 
       // 切換分類，更新頁碼資訊
-      vm.updataPagination();
+      vm.$store.dispatch('paginationModules/updatePagination', vm.newProducts);
 
       // 切換分類，清除搜尋
       if (vm.filterText) {
         vm.filterText = '';
       }
-    },
-    updataPagination() {
-      const vm = this;
-      const resultLen = Number(vm.newProducts.length);
-      const perpage = 6;
-      let totalPages = 1;
-      if (resultLen) {
-        totalPages = Math.ceil(resultLen / Number(perpage));
-      }
-
-      vm.pagination = {
-        perpage: 6,
-        result_length: 0,
-        total_pages: totalPages,
-        current_page: 1,
-      };
     },
     search() {
       const vm = this;
@@ -194,7 +163,7 @@ export default {
         vm.filterText = vm.searchText;
 
         // 切換分類，更新頁碼資訊
-        vm.updataPagination();
+        vm.$store.dispatch('paginationModules/updatePagination', vm.newProducts);
 
         vm.searchText = '';
       } else {
@@ -207,8 +176,7 @@ export default {
       }
     },
     changePage(currentPage) {
-      this.currentPage = currentPage;
-      this.pagination.current_page = Number(currentPage);
+      this.$store.dispatch('paginationModules/updateCurrentPage', currentPage);
     },
     ...mapActions('cartModules', ['getCarts']),
   },
@@ -250,6 +218,7 @@ export default {
     ...mapGetters('cartModules', ['carts']),
     ...mapGetters('productsModules', ['products', 'categories', 'categoryImg']),
     ...mapGetters('favoriteModules', ['favorites']),
+    ...mapGetters('paginationModules', ['pagination']),
   },
   components: {
     Pagination,

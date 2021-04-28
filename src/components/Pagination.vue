@@ -27,12 +27,16 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
-  props: ['pagination'],
   methods: {
     changePage(page) {
       this.$emit('get-data', page);
     },
+  },
+  computed: {
+    ...mapGetters('paginationModules', ['pagination']),
   },
 };
 </script>
