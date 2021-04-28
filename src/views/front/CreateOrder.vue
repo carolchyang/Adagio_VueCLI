@@ -330,64 +330,33 @@ export default {
         coupon: '',
         message: '',
       },
-      carts: [
-        {
-          product: {
-            id: 'VsUEtsRggj29pjWdU7qpztNufU8V7A14EZwgUmyaF3CtXNHuE1AfElPLsJUZsdkj',
-            title: '香蕉藍莓吐司',
-            category: '甜點',
-            content: '外皮烤得酥脆的吐司，淋上蜂蜜，在放上新鮮藍莓及香蕉，是下午茶的最佳選擇。',
-            imageUrl: [
-              'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/018MuZgNsws0HqBztf6ykaqD5rBLNaRet6a4uJ4J8wY6fPrR8c5WGY5GgHIDoG192xZIsEw0Iroo4IWtPebJPHsupSRjmRSxsn03A88TTOqwZtJvsR0Hvr3HGeuBRNuE.jpg',
-            ],
-            enabled: true,
-            origin_price: 150,
-            price: 150,
-            unit: '份',
-          },
-          quantity: 1,
-          created: {
-            diff: '4小時前',
-            datetime: '2021-04-28 21:43:43',
-            timestamp: 1619617423,
-          },
-          updated: {
-            diff: '4小時前',
-            datetime: '2021-04-28 21:43:43',
-            timestamp: 1619617423,
-          },
-        },
-        {
-          product: {
-            id: 'WkNnSAFsYZiVye4acw3iHfNRrCYjpGY53Qq8sc2PE5hty8e34tysgECWbNz4zkqX',
-            title: '精選小羊排',
-            category: '主餐',
-            content: '特別嚴選的羊小排，使用獨家配方醃製，肉質鮮嫩多汁，保證讓您垂涎欲滴。',
-            imageUrl: [
-              'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/lRexmdNb7cBQLXrhUkO4M14oXaFQco1fSg0OWEHKLO5jQxGnF92tyYMEyO9phJcDtZwcxa8lpED3EvcCIaTm19HDDIDh0VIR5EvIHXleWUbWVaJnSrQdVRRQtbMwUPlB.jpg',
-              null,
-            ],
-            enabled: true,
-            origin_price: 700,
-            price: 700,
-            unit: '份',
-          },
-          quantity: 2,
-          created: {
-            diff: '4小時前',
-            datetime: '2021-04-28 21:37:46',
-            timestamp: 1619617066,
-          },
-          updated: {
-            diff: '4小時前',
-            datetime: '2021-04-28 21:37:46',
-            timestamp: 1619617066,
-          },
-        },
-      ],
-      cartsNum: 2,
-      totalMoney: 100,
+      carts: {},
+      cartsNum: 0,
+      totalMoney: 0,
     };
+  },
+  methods: {
+    getCarts() {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
+      vm.isLoading = true;
+      let num = 0;
+      let total = 0;
+      vm.$http.get(url).then((res) => {
+        vm.carts = res.data.data;
+        vm.carts.forEach((item) => {
+          num += Number(item.quantity);
+          const price = item.product.price * item.quantity;
+          total += price;
+        });
+        vm.cartsNum = num;
+        vm.totalMoney = total;
+        vm.isLoading = false;
+      });
+    },
+  },
+  created() {
+    this.getCarts();
   },
 };
 </script>
