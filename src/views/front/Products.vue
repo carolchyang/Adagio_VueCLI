@@ -12,8 +12,10 @@
           <div class="categories">
             <h3 class="categories-title">產品分類</h3>
               <ul class="categories-list">
-              <li v-for="category in categories" :key="category.key">
-                <a href="#" class="categories-link">
+              <li v-for="category in categories" :key="category.key"
+               :class="{'active': category.title === filterCategory}">
+                <a href="#" class="categories-link"
+                 @click.prevent="getCategory(category)">
                   {{ category.title }}
                 </a>
               </li>
@@ -145,6 +147,7 @@ export default {
       products: [],
       searchText: '',
       filterText: '',
+      filterCategory: '全部',
     };
   },
   methods: {
@@ -270,12 +273,51 @@ export default {
       vm.$emit('get-favorites');
       vm.getFavorites();
     },
+    getCategory(category) {
+      const vm = this;
+      vm.filterCategory = category.title;
+
+      // 切換分類，更換封面圖
+      vm.categories.forEach((item, index) => {
+        if (item.title === vm.filterCategory) {
+          vm.bannerImg = vm.categories[index].bannerImg;
+        }
+      });
+
+      // 切換分類，更新頁碼資訊
+      vm.updataPagination();
+    },
+    updataPagination() {
+      const vm = this;
+      const resultLen = Number(vm.newProducts.length);
+      const perpage = 6;
+      let totalPages = 1;
+      if (resultLen) {
+        totalPages = Math.ceil(resultLen / Number(perpage));
+      }
+
+      vm.pagination = {
+        perpage: 6,
+        result_length: 0,
+        total_pages: totalPages,
+        current_page: 1,
+      };
+    },
     changePage(currentPage) {
       this.currentPage = currentPage;
       this.pagination.current_page = Number(currentPage);
     },
   },
   computed: {
+    newProducts() {
+      const vm = this;
+
+      // 分類不為全部
+      if (vm.filterCategory !== '全部') {
+        return vm.products.filter((item) => item.category === vm.filterCategory);
+      }
+      return vm.products;
+    },
     filterData() {
       const vm = this;
       const data = [];
@@ -288,7 +330,7 @@ export default {
       const minItem = (currentPage * perpage) - perpage + 1;
       const maxItem = currentPage * perpage;
 
-      vm.products.forEach((item, i) => {
+      vm.newProducts.forEach((item, i) => {
         const itemNum = i + 1;
         if (itemNum >= minItem && itemNum <= maxItem) {
           data.push(item);
