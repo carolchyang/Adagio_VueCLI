@@ -340,7 +340,7 @@ export default {
           text: '搜尋內容為空，請輸入搜尋文字',
           status: 'danger',
         };
-        vm.$bus.$emit('alertMessage', msg);
+        vm.$bus.$emit('alertmessage', msg, 'modal');
       }
     },
     changePage(currentPage) {
