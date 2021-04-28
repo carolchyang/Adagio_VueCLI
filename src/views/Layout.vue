@@ -184,7 +184,7 @@ export default {
 
         // 若在 Products 或 Product 頁則重整內頁購物車
         const routerName = vm.$refs.view.$route.name;
-        if (routerName === 'Product') {
+        if (routerName === 'Product' || routerName === 'Products') {
           vm.$refs.view.getCarts();
         }
       }).catch(() => {
