@@ -73,7 +73,8 @@
                       特價： {{ product.price | currency }}
                     </li>
                   </ul>
-                  <a href="#" class="btn btn-dark btn-sm card-btn">
+                  <a href="#" class="btn btn-dark btn-sm card-btn"
+                   @click.prevent="updateCartItem(product.id, 1)">
                     <span class="mr-1">
                       <i class="fas fa-shopping-basket"></i>
                     </span>
@@ -137,104 +138,8 @@ export default {
         current_page: 1,
         total_pages: 1,
       },
-      carts: [
-        {
-          product: {
-            id: 'a9U3hqxc0BydyKfdzIwnz8tnyOpzXDjaZgyATTYndr4uS7GZv7v9IaVvnh44vxKE',
-            title: '美式咖啡',
-            category: '飲品',
-            content: '使用品質良好的阿拉比卡咖啡，沖出美味的美式咖啡，提省醒腦，還可以減脂，快來喝一杯吧。',
-            imageUrl: [
-              'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/WnkTKZoCyJQoXtnnMzxvpflsc3cA40GccFs81uLwxezCFfwI1xTHTo7BSF7WkM5ZFjBvLYhUlwF3TkrpXORzaEy0PELtybpQstpTlSgTP6nuVssQTjNgEs4iIl8EQKEP.jpg',
-              null,
-            ],
-            enabled: true,
-            origin_price: 100,
-            price: 100,
-            unit: '杯',
-          },
-          quantity: 1,
-          created: {
-            diff: '5秒前',
-            datetime: '2021-04-16 12:37:05',
-            timestamp: 1618547825,
-          },
-          updated: {
-            diff: '5秒前',
-            datetime: '2021-04-16 12:37:05',
-            timestamp: 1618547825,
-          },
-        },
-        {
-          product: {
-            id: 'TU44OTBqGIU0qEJifrqVXuZiMEOi5OnmOG7CYgRdGt4eDaxAbzzJ0PX4TH6eKQQC',
-            title: '風琴馬鈴薯',
-            category: '輕食',
-            content: '將馬鈴薯切成薄薄一片，在抹上調味料，讓食物更入味，烤好後的馬鈴薯，像手風琴一樣，好看又好吃。',
-            imageUrl: [
-              'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/ZO31qi6vT5RKD2VQ8vtgnyXaqRE2B81qhelBuo7ph9F7MVKV67LN7ePt1ymfRJprq7Pi44roh8NmaINT0FxYBzwUb7RSz3pOIlCq0DlNihKjlWKGpK1aWSZiM3SX2K8N.jpg',
-            ],
-            enabled: true,
-            origin_price: 300,
-            price: 250,
-            unit: '份',
-          },
-          quantity: 1,
-          created: {
-            diff: '9秒前',
-            datetime: '2021-04-16 12:37:01',
-            timestamp: 1618547821,
-          },
-          updated: {
-            diff: '9秒前',
-            datetime: '2021-04-16 12:37:01',
-            timestamp: 1618547821,
-          },
-        },
-        {
-          product: {
-            id: 'VsUEtsRggj29pjWdU7qpztNufU8V7A14EZwgUmyaF3CtXNHuE1AfElPLsJUZsdkj',
-            title: '香蕉藍莓吐司',
-            category: '甜點',
-            content: '外皮烤得酥脆的吐司，淋上蜂蜜，在放上新鮮藍莓及香蕉，是下午茶的最佳選擇。',
-            imageUrl: [
-              'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/018MuZgNsws0HqBztf6ykaqD5rBLNaRet6a4uJ4J8wY6fPrR8c5WGY5GgHIDoG192xZIsEw0Iroo4IWtPebJPHsupSRjmRSxsn03A88TTOqwZtJvsR0Hvr3HGeuBRNuE.jpg',
-            ],
-            enabled: true,
-            origin_price: 150,
-            price: 150,
-            unit: '份',
-          },
-          quantity: 2,
-          created: {
-            diff: '1天前',
-            datetime: '2021-04-14 16:30:11',
-            timestamp: 1618389011,
-          },
-          updated: {
-            diff: '1天前',
-            datetime: '2021-04-14 16:30:18',
-            timestamp: 1618389018,
-          },
-        },
-      ],
-      favorites: [
-        {
-          id: 'Iy0zKxztexOSTucPvCBlXqtpHxt3pB5yznckbMKhkUemzjHkvBc6yodqJzVN6W9b',
-          title: '泰式綜合蔬菜沙拉',
-          imageUrl: 'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/vTztVOkJ1nPPXbh0AlvFBLlWonzimMjc8SrPWDGXv6r0aj3HnaUX3qwbdqB66TjHYUTCN1V4BictbqhlJ9hF6H5MpsveqgFIc6ajHwkyt5Ec0hnCEGV7GpKzNRpYhh3t.jpg',
-        },
-        {
-          id: 'TU44OTBqGIU0qEJifrqVXuZiMEOi5OnmOG7CYgRdGt4eDaxAbzzJ0PX4TH6eKQQC',
-          title: '風琴馬鈴薯',
-          imageUrl: 'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/ZO31qi6vT5RKD2VQ8vtgnyXaqRE2B81qhelBuo7ph9F7MVKV67LN7ePt1ymfRJprq7Pi44roh8NmaINT0FxYBzwUb7RSz3pOIlCq0DlNihKjlWKGpK1aWSZiM3SX2K8N.jpg',
-        },
-        {
-          id: 'VsUEtsRggj29pjWdU7qpztNufU8V7A14EZwgUmyaF3CtXNHuE1AfElPLsJUZsdkj',
-          title: '香蕉藍莓吐司',
-          imageUrl: 'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/018MuZgNsws0HqBztf6ykaqD5rBLNaRet6a4uJ4J8wY6fPrR8c5WGY5GgHIDoG192xZIsEw0Iroo4IWtPebJPHsupSRjmRSxsn03A88TTOqwZtJvsR0Hvr3HGeuBRNuE.jpg',
-        },
-      ],
+      carts: [],
+      favorites: [],
       categoryImg: categoryImgAllmenu,
       categories: [
         {
@@ -271,9 +176,59 @@ export default {
       vm.$http.get(url).then((res) => {
         vm.products = res.data.data;
 
+        vm.getCarts();
         vm.getFavorites();
 
         vm.isLoading = false;
+      });
+    },
+    getCarts() {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
+      vm.isLoading = true;
+      vm.$http.get(url).then((res) => {
+        vm.carts = res.data.data;
+        vm.isLoading = false;
+      });
+    },
+    updateCartItem(id, num) {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
+      let n = 0;
+      let method = 'post';
+
+      n = Number(num);
+
+      const isInCart = vm.carts.filter((item) => item.product.id === id);
+
+      if (isInCart.length > 0) {
+        method = 'patch';
+        n = Number(isInCart[0].quantity) + Number(num);
+      }
+
+      const data = {
+        product: id,
+        quantity: n,
+      };
+      vm.isLoading = true;
+      vm.$http[method](url, data).then(() => {
+        vm.isLoading = false;
+        vm.getCarts();
+        vm.$emit('get-carts');
+
+        const msg = {
+          icon: 'success',
+          title: '更新購物車成功',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      }).catch(() => {
+        vm.isLoading = false;
+
+        const msg = {
+          icon: 'error',
+          title: '更新購物車失敗',
+        };
+        vm.$bus.$emit('alertmessage', msg);
       });
     },
     getFavorites() {
@@ -343,21 +298,6 @@ export default {
 
 .pagebanner {
   margin-bottom: 3.5rem;
-  padding: 11rem 0 8rem;
-  background-size: cover;
-  background-position: 50%;
-  background-repeat: no-repeat;
-  transition: 0.5s all ease;
-  text-align: center;
-  color: $white;
-  h2{
-    display:inline-block;
-    margin-bottom:0;
-    padding:1rem 5rem;
-    background-color:rgba(52,58,64,.8);
-    border-radius:.25rem;
-    font-size:1.5rem
-  }
 }
 
 .products {
@@ -488,23 +428,5 @@ export default {
 
 .products-pagination {
   margin: 0 auto 3rem;
-}
-
-.favorite-icon {
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: .25rem 1rem;
-  transition: all .3s ease;
-  color: $danger;
-  font-size: 1.75rem;
-  &:hover {
-    transform: scale(1.2);
-    color: $danger;
-  }
-}
-
-.favorite-icon-lg {
-  font-size: 2rem;
 }
 </style>
