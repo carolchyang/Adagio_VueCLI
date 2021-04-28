@@ -256,93 +256,24 @@ export default {
           categoryImg: categoryImgDrinks,
         },
       ],
-      products: [
-        {
-          id: 'VsUEtsRggj29pjWdU7qpztNufU8V7A14EZwgUmyaF3CtXNHuE1AfElPLsJUZsdkj',
-          title: '香蕉藍莓吐司',
-          category: '甜點',
-          content: '外皮烤得酥脆的吐司，淋上蜂蜜，在放上新鮮藍莓及香蕉，是下午茶的最佳選擇。',
-          imageUrl: [
-            'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/018MuZgNsws0HqBztf6ykaqD5rBLNaRet6a4uJ4J8wY6fPrR8c5WGY5GgHIDoG192xZIsEw0Iroo4IWtPebJPHsupSRjmRSxsn03A88TTOqwZtJvsR0Hvr3HGeuBRNuE.jpg',
-          ],
-          enabled: true,
-          origin_price: 150,
-          price: 150,
-          unit: '份',
-          options: {
-            ingredient: '麵粉、奶油、香蕉、藍莓、蜂蜜',
-          },
-        },
-        {
-          id: 'Iy0zKxztexOSTucPvCBlXqtpHxt3pB5yznckbMKhkUemzjHkvBc6yodqJzVN6W9b',
-          title: '泰式綜合蔬菜沙拉',
-          category: '輕食',
-          content: '酸酸甜甜的泰式酸辣醬，搭配爽脆口可的蔬菜，在炎熱的天氣裡促進您的食慾，營養又健康。',
-          imageUrl: [
-            'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/vTztVOkJ1nPPXbh0AlvFBLlWonzimMjc8SrPWDGXv6r0aj3HnaUX3qwbdqB66TjHYUTCN1V4BictbqhlJ9hF6H5MpsveqgFIc6ajHwkyt5Ec0hnCEGV7GpKzNRpYhh3t.jpg',
-          ],
-          enabled: true,
-          origin_price: 150,
-          price: 100,
-          unit: '份',
-          options: {
-            ingredient: '酪梨、小黃瓜、香菜、蒜頭、花生、檸檬、芝麻、辣椒、泰式酸辣醬',
-          },
-        },
-        {
-          id: 'TU44OTBqGIU0qEJifrqVXuZiMEOi5OnmOG7CYgRdGt4eDaxAbzzJ0PX4TH6eKQQC',
-          title: '風琴馬鈴薯',
-          category: '輕食',
-          content: '將馬鈴薯切成薄薄一片，在抹上調味料，讓食物更入味，烤好後的馬鈴薯，像手風琴一樣，好看又好吃。',
-          imageUrl: [
-            'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/ZO31qi6vT5RKD2VQ8vtgnyXaqRE2B81qhelBuo7ph9F7MVKV67LN7ePt1ymfRJprq7Pi44roh8NmaINT0FxYBzwUb7RSz3pOIlCq0DlNihKjlWKGpK1aWSZiM3SX2K8N.jpg',
-          ],
-          enabled: true,
-          origin_price: 300,
-          price: 250,
-          unit: '份',
-          options: {
-            ingredient: '馬鈴薯、迷迭香、無鹽奶油、義式香料',
-          },
-        },
-        {
-          id: 'GR2NIRnkNrVmOZLkZnofA6xXzNa9o0IK2C9dkKlWJwXfbKLwNr5pELlpogZHcshC',
-          title: '香草冰淇淋',
-          category: '甜點',
-          content: '簡單無負擔的食材，製作出口感綿密、奶香十足的香草冰淇淋，最適合當飯後甜點。',
-          imageUrl: [
-            'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/zaf5S1vRksKYsw9knfwOK7uN7vucwnI37TsL9aTWFPHjzN1nb7nD5qiG2NcBAby6DazMpQEVbsOElrkeG59TXsOr0utRzano9boKjt3DdKv9MQSqsqnEAOSyxN1V4dy8.jpg',
-            null,
-          ],
-          enabled: true,
-          origin_price: 50,
-          price: 50,
-          unit: '支',
-          options: {
-            ingredient: '香草豆莢、牛奶、鮮奶油、砂糖',
-          },
-        },
-        {
-          id: 'a9U3hqxc0BydyKfdzIwnz8tnyOpzXDjaZgyATTYndr4uS7GZv7v9IaVvnh44vxKE',
-          title: '美式咖啡',
-          category: '飲品',
-          content: '使用品質良好的阿拉比卡咖啡，沖出美味的美式咖啡，提省醒腦，還可以減脂，快來喝一杯吧。',
-          imageUrl: [
-            'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/WnkTKZoCyJQoXtnnMzxvpflsc3cA40GccFs81uLwxezCFfwI1xTHTo7BSF7WkM5ZFjBvLYhUlwF3TkrpXORzaEy0PELtybpQstpTlSgTP6nuVssQTjNgEs4iIl8EQKEP.jpg',
-            null,
-          ],
-          enabled: true,
-          origin_price: 100,
-          price: 100,
-          unit: '杯',
-          options: {
-            ingredient: '阿拉比卡咖啡豆、水',
-          },
-        },
-      ],
+      products: [],
       searchText: '',
       filterText: '',
     };
+  },
+  methods: {
+    getProducts() {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/products`;
+      vm.isLoading = true;
+      vm.$http.get(url).then((res) => {
+        vm.products = res.data.data;
+        vm.isLoading = false;
+      });
+    },
+  },
+  created() {
+    this.getProducts();
   },
 };
 </script>
