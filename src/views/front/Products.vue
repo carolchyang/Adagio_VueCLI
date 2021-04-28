@@ -48,11 +48,13 @@
                     </span>
                   </div>
                   <div class="card-category">{{ product.category }}</div>
-                  <a href="#" class="favorite-icon" v-show="product.isFavorite">
+                  <a href="#" class="favorite-icon" @click.prevent="delFavoriteItem(product)"
+                   v-show="product.isFavorite">
                    <i class="fas fa-heart"></i>
 
                   </a>
-                  <a href="#" class="favorite-icon" v-show="!product.isFavorite">
+                  <a href="#" class="favorite-icon" @click.prevent="addFavorite(product)"
+                   v-show="!product.isFavorite">
                     <i class="far fa-heart"></i>
                   </a>
                 </div>
@@ -287,6 +289,43 @@ export default {
           }
         });
       });
+    },
+    addFavorite(item) {
+      const vm = this;
+      const favoriteData = {
+        id: item.id,
+        title: item.title,
+        imageUrl: item.imageUrl[0],
+      };
+      vm.favorites.push(favoriteData);
+      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
+
+      const msg = {
+        icon: 'success',
+        title: '已加入我的最愛',
+      };
+      vm.$bus.$emit('alertmessage', msg);
+
+      vm.$emit('get-favorites');
+      vm.getFavorites();
+    },
+    delFavoriteItem(item) {
+      const vm = this;
+      vm.favorites.forEach((favoriteItem, index) => {
+        if (favoriteItem.id === item.id) {
+          vm.favorites.splice(index, 1);
+        }
+      });
+      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
+
+      const msg = {
+        icon: 'success',
+        title: '已刪除我的最愛',
+      };
+      vm.$bus.$emit('alertmessage', msg);
+
+      vm.$emit('get-favorites');
+      vm.getFavorites();
     },
   },
   created() {

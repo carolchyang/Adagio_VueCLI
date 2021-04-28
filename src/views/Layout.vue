@@ -3,7 +3,7 @@
     <AlertMessage/>
     <loading :active.sync="isLoading" :is-full-page="true"></loading>
 
-    <div class="header-wrap">
+    <div class="header-wrap" :class="{'header-scroll': isMenuOpen || scrollHeader}">
       <div class="container header">
         <router-link to="/" class="header-logo">Adagio</router-link>
 
@@ -137,6 +137,7 @@
 </template>
 
 <script>
+/* global $ */
 import AlertMessage from '@/components/AlertMessage.vue';
 
 export default {
@@ -144,7 +145,9 @@ export default {
   data() {
     return {
       isLoading: false,
+      scrollHeader: false,
       isMenuOpen: false,
+      routerName: this.$route.name,
       carts: [],
       cartsNum: 0,
       favorites: [],
@@ -179,7 +182,7 @@ export default {
         vm.$bus.$emit('alertmessage', msg);
         vm.getCarts();
 
-        // 若在 Product 頁則重整內頁購物車
+        // 若在 Products 或 Product 頁則重整內頁購物車
         const routerName = vm.$refs.view.$route.name;
         if (routerName === 'Product') {
           vm.$refs.view.getCarts();
@@ -214,9 +217,9 @@ export default {
       vm.$bus.$emit('alertmessage', msg);
       vm.getFavorites();
 
-      // 若在 Product 頁則重整內頁我的最愛
+      // 若在 Products 或 Product 頁則重整內頁我的最愛
       const routerName = vm.$refs.view.$route.name;
-      if (routerName === 'Product') {
+      if (routerName === 'Product' || routerName === 'Products') {
         vm.$refs.view.getFavorites();
       }
     },
@@ -243,21 +246,52 @@ export default {
           vm.$bus.$emit('alertmessage', msg);
           vm.getFavorites();
 
-          // 若在 Product 頁則重整內頁我的最愛
+          // 若在 Products 或 Product 頁則重整內頁我的最愛
           const routerName = vm.$refs.view.$route.name;
-          if (routerName === 'Product') {
+          if (routerName === 'Product' || routerName === 'Products') {
             vm.$refs.view.getFavorites();
           }
         }
       });
     },
+    scrollPage() {
+      const vm = this;
+      const scrollTop = $(window).scrollTop();
+      const { routerName } = this;
+      switch (true) {
+        case routerName === 'Home' && scrollTop > 0:
+          window.addEventListener('scroll', vm.scrollPage);
+          vm.scrollHeader = true;
+          break;
+        case routerName === 'Home':
+          window.addEventListener('scroll', vm.scrollPage);
+          vm.scrollHeader = false;
+          break;
+        default:
+          window.removeEventListener('scroll', vm.scrollPage);
+          vm.scrollHeader = true;
+          break;
+      }
+    },
   },
   components: {
     AlertMessage,
   },
+  watch: {
+    $route(to, from) {
+      const vm = this;
+      if (to.path !== from.path) {
+        vm.routerName = to.name;
+        vm.isMenuOpen = false;
+        vm.scrollPage();
+      }
+    },
+  },
   created() {
-    this.getCarts();
-    this.getFavorites();
+    const vm = this;
+    vm.getCarts();
+    vm.getFavorites();
+    vm.scrollPage();
   },
 };
 </script>
@@ -268,9 +302,16 @@ export default {
 .header-wrap {
   position: fixed;
   width: 100%;
-  background-color: $dark;
+  background-color: transparent;
   transition: 0.25s ease all;
   z-index: 999;
+}
+
+.header-scroll {
+  background-color: $dark;
+  .header-logo {
+    font-size: 2rem;
+  }
 }
 
 .header {
@@ -286,7 +327,7 @@ export default {
   font-family: $font-logo;
   transition: 0.25s ease all;
   color: $white;
-  font-size: 2rem;
+  font-size: 2.25rem;
   &:hover {
     color: $white;
   }
