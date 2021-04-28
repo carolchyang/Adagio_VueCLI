@@ -1,5 +1,7 @@
 <template>
   <div>
+    <loading :active.sync="isLoading" :is-full-page="true"></loading>
+
     <div class="pagebanner pagebanner-img">
       <h2>結帳流程</h2>
     </div>
@@ -106,59 +108,46 @@ export default {
   name: 'Order',
   data() {
     return {
+      isLoading: false,
       step: 3,
       orderId: '',
-      order: {
-        id: 'sETLFTz2eqgDr5ZIRGABWPq4WzNTHt1LFR8ZNSXwu2964btDylp3tib3iOQmBAT9',
-        message: '1',
-        user: {
-          name: '生活',
-          email: 'carol@gmail.com',
-          tel: '1234567891',
-          address: 's',
-        },
-        coupon: {
-          title: '周年慶9折',
-          code: 'happy9',
-          percent: 90,
-          enabled: true,
-          deadline_at: '2021-01-01T04:59:00.000000Z',
-        },
-        amount: 90,
-        products: [
-          {
-            product: {
-              title: '泰式綜合蔬菜沙拉',
-              category: '輕食',
-              content: '酸酸甜甜的泰式酸辣醬，搭配爽脆口可的蔬菜，在炎熱的天氣裡促進您的食慾，營養又健康。',
-              description: '<p>酸酸甜甜的泰式酸辣醬，搭配爽脆口可的蔬菜，在炎熱的天氣裡促進您的食慾，營養又健康。</p>',
-              imageUrl: [
-                'https://hexschool-api.s3.us-west-2.amazonaws.com/custom/vTztVOkJ1nPPXbh0AlvFBLlWonzimMjc8SrPWDGXv6r0aj3HnaUX3qwbdqB66TjHYUTCN1V4BictbqhlJ9hF6H5MpsveqgFIc6ajHwkyt5Ec0hnCEGV7GpKzNRpYhh3t.jpg',
-              ],
-              enabled: true,
-              origin_price: 150,
-              price: 100,
-              unit: '份',
-            },
-            quantity: 1,
-          },
-        ],
-        payment: 'WebATM',
-        paid: false,
-        paid_at: null,
-        paid_diff: null,
-        created: {
-          diff: '3秒前',
-          datetime: '2021-04-29 03:12:16',
-          timestamp: 1619637136,
-        },
-        updated: {
-          diff: '3秒前',
-          datetime: '2021-04-29 03:12:16',
-          timestamp: 1619637136,
-        },
-      },
+      order: {},
     };
+  },
+  methods: {
+    getOrder(id) {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/orders/${id}`;
+      vm.isLoading = true;
+      vm.$http.get(url).then((res) => {
+        vm.order = res.data.data;
+        vm.isLoading = false;
+      }).catch(() => {
+        vm.isLoading = false;
+        vm.$swal({
+          title: '出錯了',
+          text: '糟糕，找不到此訂單，將返回首頁',
+          confirmButtonColor: '#dc3545',
+          allowOutsideClick: false,
+          confirmButtonText: '確認',
+          customClass: {
+            title: 'swal-title swal-title-danger',
+          },
+        }).then(() => {
+          vm.$router.push('/');
+        });
+      });
+    },
+  },
+  created() {
+    const vm = this;
+    const id = vm.$route.params.orderId;
+    if (id) {
+      vm.getOrder(id);
+      vm.orderId = id;
+    } else {
+      vm.$router.push('/');
+    }
   },
 };
 </script>
