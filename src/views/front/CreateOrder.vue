@@ -49,12 +49,18 @@
               </td>
               <td class="d-none d-sm-table-cell align-middle text-center">
                 <div class="counter">
-                  <a href="#" class="lessNum">
+                  <a href="#" class="lessNum"
+                   @click.prevent="
+                   updateCartItem(cart.product.id, cart.quantity - 1)"
+                  >
                     <i class="fas fa-minus"></i>
                   </a>
                   <input type="number" min="1" readonly="readonly"
                    :value="cart.quantity" class="counter-input">
-                  <a href="#" class="addNum">
+                  <a href="#" class="addNum"
+                   @click.prevent="
+                   updateCartItem(cart.product.id, cart.quantity + 1)"
+                  >
                     <i class="fas fa-plus"></i>
                   </a>
                 </div>
@@ -66,7 +72,7 @@
                 {{ cart.product.price | currency }}
               </td>
               <td class="align-middle text-center">
-                <a href="#" class="text-danger">
+                <a href="#" class="text-danger" @click.prevent="delCartItem(cart.product.id)">
                   <i class="far fa-trash-alt"></i>
                 </a>
               </td>
@@ -336,6 +342,66 @@ export default {
     };
   },
   methods: {
+    updateCartItem(id, num) {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
+
+      if (num <= 0) {
+        const msg = {
+          icon: 'error',
+          title: '商品數量必須大於 1 樣',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+      } else {
+        const data = {
+          product: id,
+          quantity: num,
+        };
+        vm.isLoading = true;
+
+        vm.$http.patch(url, data).then(() => {
+          vm.isLoading = false;
+          vm.$emit('get-carts');
+          vm.getCarts();
+          const msg = {
+            icon: 'success',
+            title: '更新購物車成功',
+          };
+          vm.$bus.$emit('alertmessage', msg);
+        }).catch(() => {
+          vm.isLoading = false;
+          const msg = {
+            icon: 'error',
+            title: '更新購物車失敗',
+          };
+          vm.$bus.$emit('alertmessage', msg);
+        });
+      }
+    },
+    delCartItem(id) {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping/${id}`;
+      vm.isLoading = true;
+      vm.$http.delete(url, { product: id }).then(() => {
+        const msg = {
+          icon: 'success',
+          title: '已刪除此筆資料',
+        };
+        vm.isLoading = false;
+        vm.$bus.$emit('alertmessage', msg);
+
+        vm.$emit('get-carts');
+        vm.getCarts();
+      }).catch(() => {
+        const msg = {
+          icon: 'error',
+          title: '刪除購物車失敗',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+
+        vm.isLoading = false;
+      });
+    },
     getCarts() {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
