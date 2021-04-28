@@ -137,7 +137,7 @@
 
 <script>
 /* global $ */
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'Layout',
@@ -146,51 +146,11 @@ export default {
       scrollHeader: false,
       isMenuOpen: false,
       routerName: this.$route.name,
-      carts: [],
-      cartsNum: 0,
     };
   },
   methods: {
-    getCarts() {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-      vm.$store.dispatch('updateLoading', true, { root: true });
-      vm.$http.get(url).then((res) => {
-        let num = 0;
-        vm.carts = res.data.data;
-        vm.carts.forEach((item) => {
-          num += item.quantity;
-        });
-        vm.cartsNum = num;
-        vm.$store.dispatch('updateLoading', false, { root: true });
-      });
-    },
     delCartItem(id) {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping/${id}`;
-      vm.$store.dispatch('updateLoading', true, { root: true });
-      vm.$http.delete(url, { product: id }).then(() => {
-        vm.$store.dispatch('updateLoading', false, { root: true });
-        const msg = {
-          icon: 'success',
-          title: '已刪除此筆資料',
-        };
-        vm.$store.dispatch('alertMessageModules/openToast', msg);
-        vm.getCarts();
-
-        // 若在 checkorder 或 Products 或 Product 頁則重整內頁購物車
-        const routerName = vm.$refs.view.$route.name;
-        if (routerName === 'Products' || routerName === 'Product' || routerName === 'CreateOrder') {
-          vm.$refs.view.getCarts();
-        }
-      }).catch(() => {
-        vm.$store.dispatch('updateLoading', false, { root: true });
-        const msg = {
-          icon: 'error',
-          title: '刪除購物車失敗',
-        };
-        vm.$store.dispatch('alertMessageModules/openToast', msg);
-      });
+      this.$store.dispatch('cartModules/delCartItem', id);
     },
     delFavoriteItem(item) {
       const { routerName } = this;
@@ -244,9 +204,11 @@ export default {
           break;
       }
     },
+    ...mapActions('cartModules', ['getCarts']),
   },
   computed: {
     ...mapGetters(['isLoading']),
+    ...mapGetters('cartModules', ['carts', 'cartsNum']),
     ...mapGetters('favoriteModules', ['favorites', 'favoritesNum']),
   },
   watch: {
@@ -261,7 +223,7 @@ export default {
   },
   created() {
     const vm = this;
-    vm.getCarts();
+    vm.$store.dispatch('cartModules/getCarts');
     vm.$store.dispatch('favoriteModules/getFavorites');
     vm.scrollPage();
   },

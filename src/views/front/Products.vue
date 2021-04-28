@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 import Pagination from '@/components/Pagination.vue';
 import categoryImgAllmenu from '@/assets/images/banner-allmenu.jpg';
@@ -122,7 +122,6 @@ export default {
         total_pages: 1, // 總共有幾頁
         current_page: 1, // 所在頁面
       },
-      carts: [],
       categoryImg: categoryImgAllmenu,
       categories: [
         {
@@ -153,6 +152,9 @@ export default {
     };
   },
   methods: {
+    updateCartItem(id, num) {
+      this.$store.dispatch('cartModules/updateCartItem', { id, num, method: 'add' });
+    },
     getProducts() {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/products`;
@@ -173,55 +175,6 @@ export default {
         vm.getFavorites();
 
         vm.$store.dispatch('updateLoading', false, { root: true });
-      });
-    },
-    getCarts() {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-      vm.$store.dispatch('updateLoading', true, { root: true });
-      vm.$http.get(url).then((res) => {
-        vm.carts = res.data.data;
-        vm.$store.dispatch('updateLoading', false, { root: true });
-      });
-    },
-    updateCartItem(id, num) {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-      let n = 0;
-      let method = 'post';
-
-      n = Number(num);
-
-      const isInCart = vm.carts.filter((item) => item.product.id === id);
-
-      if (isInCart.length > 0) {
-        method = 'patch';
-        n = Number(isInCart[0].quantity) + Number(num);
-      }
-
-      const data = {
-        product: id,
-        quantity: n,
-      };
-      vm.$store.dispatch('updateLoading', true, { root: true });
-      vm.$http[method](url, data).then(() => {
-        vm.$store.dispatch('updateLoading', false, { root: true });
-        vm.getCarts();
-        vm.$emit('get-carts');
-
-        const msg = {
-          icon: 'success',
-          title: '更新購物車成功',
-        };
-        vm.$store.dispatch('alertMessageModules/openToast', msg);
-      }).catch(() => {
-        vm.$store.dispatch('updateLoading', false, { root: true });
-
-        const msg = {
-          icon: 'error',
-          title: '更新購物車失敗',
-        };
-        vm.$store.dispatch('alertMessageModules/openToast', msg);
       });
     },
     getFavorites() {
@@ -258,7 +211,7 @@ export default {
         vm.filterCategory = categoryName;
         vm.categories.forEach((item, index) => {
           if (item.title === vm.filterCategory) {
-            vm.bannerImg = vm.categories[index].bannerImg;
+            vm.categroyImg = vm.categories[index].categoryImg;
           }
         });
       }
@@ -321,6 +274,7 @@ export default {
       this.currentPage = currentPage;
       this.pagination.current_page = Number(currentPage);
     },
+    ...mapActions('cartModules', ['getCarts']),
   },
   computed: {
     newProducts() {
@@ -357,14 +311,15 @@ export default {
       });
       return data;
     },
+    ...mapGetters('cartModules', ['carts']),
     ...mapGetters('favoriteModules', ['favorites']),
   },
   components: {
     Pagination,
   },
   created() {
+    this.$store.dispatch('cartModules/getCarts');
     this.getProducts();
-    this.getCarts();
   },
 };
 </script>

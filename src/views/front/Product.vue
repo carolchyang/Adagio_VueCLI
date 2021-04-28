@@ -100,7 +100,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 import categoryImgAllmenu from '@/assets/images/banner-allmenu.jpg';
 import categoryImgMaintmeal from '@/assets/images/banner-mainmeal.jpg';
@@ -118,7 +118,6 @@ export default {
       counterNum: 1,
       product: [],
       products: [],
-      carts: [],
       categoryImg: categoryImgAllmenu,
       categories: [
         {
@@ -178,11 +177,13 @@ export default {
           break;
       }
     },
+    updateCartItem(id, num) {
+      this.$store.dispatch('cartModules/updateCartItem', { id, num, method: 'add' });
+    },
     getData() {
       const { productId } = this.$route.params;
       this.getProduct(productId);
       this.getProducts();
-      this.getCarts();
       this.$store.dispatch('favoriteModules/getFavorites');
     },
     getProducts() {
@@ -222,57 +223,13 @@ export default {
         });
       });
     },
-    getCarts() {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-      vm.$store.dispatch('updateLoading', true, { root: true });
-      vm.$http.get(url).then((res) => {
-        vm.carts = res.data.data;
-        vm.$store.dispatch('updateLoading', false, { root: true });
-      });
-    },
-    updateCartItem(id, num) {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-      let n = Number(num);
-      let method = 'post';
-      const isInCart = vm.carts.filter((item) => item.product.id === id);
-
-      if (isInCart.length > 0) {
-        method = 'patch';
-        n = Number(isInCart[0].quantity) + Number(num);
-      }
-      const data = {
-        product: id,
-        quantity: n,
-      };
-
-      vm.$store.dispatch('updateLoading', true, { root: true });
-      vm.$http[method](url, data).then(() => {
-        vm.getCarts();
-        vm.$emit('get-carts');
-
-        vm.$store.dispatch('updateLoading', false, { root: true });
-        const msg = {
-          icon: 'success',
-          title: '更新購物車成功',
-        };
-        vm.$store.dispatch('alertMessageModules/openToast', msg);
-      }).catch(() => {
-        vm.$store.dispatch('updateLoading', false, { root: true });
-        const msg = {
-          icon: 'error',
-          title: '更新購物車失敗',
-        };
-        vm.$store.dispatch('alertMessageModules/openToast', msg);
-      });
-    },
     addFavorite(item) {
       this.$store.dispatch('favoriteModules/addFavorite', item);
     },
     delFavoriteItem(item) {
       this.$store.dispatch('favoriteModules/delFavoriteItem', item);
     },
+    ...mapActions('cartModules', ['getCarts']),
   },
   computed: {
     isFavorite() {
@@ -288,6 +245,7 @@ export default {
       return this.products.filter((item) => item.category === this
         .product.category && item.id !== this.product.id);
     },
+    ...mapGetters('cartModules', ['carts']),
     ...mapGetters('favoriteModules', ['favorites']),
   },
   components: {
@@ -295,6 +253,7 @@ export default {
     SwiperSlide,
   },
   created() {
+    this.$store.dispatch('cartModules/getCarts');
     this.getData();
   },
 };
