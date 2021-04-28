@@ -100,6 +100,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 import categoryImgAllmenu from '@/assets/images/banner-allmenu.jpg';
 import categoryImgMaintmeal from '@/assets/images/banner-mainmeal.jpg';
 import categoryImgLightmeal from '@/assets/images/banner-lightmeal.jpg';
@@ -117,7 +119,6 @@ export default {
       product: [],
       products: [],
       carts: [],
-      favorites: [],
       categoryImg: categoryImgAllmenu,
       categories: [
         {
@@ -182,7 +183,7 @@ export default {
       this.getProduct(productId);
       this.getProducts();
       this.getCarts();
-      this.getFavorites();
+      this.$store.dispatch('favoriteModules/getFavorites');
     },
     getProducts() {
       const vm = this;
@@ -266,44 +267,11 @@ export default {
         vm.$store.dispatch('alertMessageModules/openToast', msg);
       });
     },
-    getFavorites() {
-      const favoriteData = JSON.parse(localStorage.getItem('favoriteData')) || [];
-      this.favorites = favoriteData;
+    addFavorite(item) {
+      this.$store.dispatch('favoriteModules/addFavorite', item);
     },
-    addFavorite(product) {
-      const vm = this;
-      const favoriteData = {
-        id: product.id,
-        title: product.title,
-        imageUrl: product.imageUrl[0],
-      };
-      vm.favorites.push(favoriteData);
-      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
-      vm.getFavorites();
-      vm.$emit('get-favorites');
-
-      const msg = {
-        icon: 'success',
-        title: '已加入我的最愛',
-      };
-      vm.$store.dispatch('alertMessageModules/openToast', msg);
-    },
-    delFavoriteItem(product) {
-      const vm = this;
-      vm.favorites.forEach((item, index) => {
-        if (item.id === product.id) {
-          this.favorites.splice(index, 1);
-        }
-      });
-      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
-      vm.getFavorites();
-      vm.$emit('get-favorites');
-
-      const msg = {
-        icon: 'success',
-        title: '已刪除我的最愛',
-      };
-      vm.$store.dispatch('alertMessageModules/openToast', msg);
+    delFavoriteItem(item) {
+      this.$store.dispatch('favoriteModules/delFavoriteItem', item);
     },
   },
   computed: {
@@ -320,6 +288,7 @@ export default {
       return this.products.filter((item) => item.category === this
         .product.category && item.id !== this.product.id);
     },
+    ...mapGetters('favoriteModules', ['favorites']),
   },
   components: {
     Swiper,

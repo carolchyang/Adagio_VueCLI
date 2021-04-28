@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 
 import alertMessageModules from './modules/alertMessage';
+import favoriteModules from './modules/favorite';
 
 Vue.use(Vuex);
 
@@ -25,5 +26,6 @@ export default new Vuex.Store({
   },
   modules: {
     alertMessageModules,
+    favoriteModules,
   },
 });

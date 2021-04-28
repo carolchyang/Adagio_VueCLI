@@ -101,6 +101,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 import Pagination from '@/components/Pagination.vue';
 import categoryImgAllmenu from '@/assets/images/banner-allmenu.jpg';
 import categoryImgMaintmeal from '@/assets/images/banner-mainmeal.jpg';
@@ -121,7 +123,6 @@ export default {
         current_page: 1, // 所在頁面
       },
       carts: [],
-      favorites: [],
       categoryImg: categoryImgAllmenu,
       categories: [
         {
@@ -225,54 +226,30 @@ export default {
     },
     getFavorites() {
       const vm = this;
-      vm.favorites = JSON.parse(localStorage.getItem('favoriteData')) || [];
-
-      // 查詢各商品是否有在我的最愛中，有則加入 isFavorite:true，否則加入 isFavorite:false
-      vm.products.forEach((productItem, index) => {
-        this.$set(vm.products[index], 'isFavorite', false);
-        vm.favorites.forEach((favoriteItem) => {
-          if (productItem.id === favoriteItem.id) {
-            this.$set(vm.products[index], 'isFavorite', true);
-          }
+      vm.$store.dispatch('favoriteModules/getFavorites')
+        .then(() => {
+          // 查詢各商品是否有在我的最愛中，有則加入 isFavorite:true，否則加入 isFavorite:false
+          vm.products.forEach((productItem, index) => {
+            this.$set(vm.products[index], 'isFavorite', false);
+            vm.favorites.forEach((favoriteItem) => {
+              if (productItem.id === favoriteItem.id) {
+                this.$set(vm.products[index], 'isFavorite', true);
+              }
+            });
+          });
         });
-      });
     },
     addFavorite(item) {
-      const vm = this;
-      const favoriteData = {
-        id: item.id,
-        title: item.title,
-        imageUrl: item.imageUrl[0],
-      };
-      vm.favorites.push(favoriteData);
-      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
-
-      const msg = {
-        icon: 'success',
-        title: '已加入我的最愛',
-      };
-      vm.$store.dispatch('alertMessageModules/openToast', msg);
-
-      vm.$emit('get-favorites');
-      vm.getFavorites();
+      this.$store.dispatch('favoriteModules/addFavorite', item)
+        .then(() => {
+          this.getFavorites();
+        });
     },
     delFavoriteItem(item) {
-      const vm = this;
-      vm.favorites.forEach((favoriteItem, index) => {
-        if (favoriteItem.id === item.id) {
-          vm.favorites.splice(index, 1);
-        }
-      });
-      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
-
-      const msg = {
-        icon: 'success',
-        title: '已刪除我的最愛',
-      };
-      vm.$store.dispatch('alertMessageModules/openToast', msg);
-
-      vm.$emit('get-favorites');
-      vm.getFavorites();
+      this.$store.dispatch('favoriteModules/delFavoriteItem', item)
+        .then(() => {
+          this.getFavorites();
+        });
     },
     getQuery() {
       const vm = this;
@@ -380,6 +357,7 @@ export default {
       });
       return data;
     },
+    ...mapGetters('favoriteModules', ['favorites']),
   },
   components: {
     Pagination,

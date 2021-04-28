@@ -126,7 +126,7 @@
       </div>
     </div>
 
-    <router-view @get-carts="getCarts" @get-favorites="getFavorites" :key="$route.fullPath"
+    <router-view @get-carts="getCarts" :key="$route.fullPath"
      ref="view"></router-view>
 
     <div class="footer">
@@ -148,8 +148,6 @@ export default {
       routerName: this.$route.name,
       carts: [],
       cartsNum: 0,
-      favorites: [],
-      favoritesNum: 0,
     };
   },
   methods: {
@@ -194,36 +192,18 @@ export default {
         vm.$store.dispatch('alertMessageModules/openToast', msg);
       });
     },
-    getFavorites() {
-      const vm = this;
-      const favoriteData = JSON.parse(localStorage.getItem('favoriteData')) || [];
-      vm.favorites = favoriteData;
-      vm.favoritesNum = favoriteData.length;
-    },
-    delFavoriteItem(product) {
-      const vm = this;
-      vm.favorites.forEach((item, index) => {
-        if (item.id === product.id) {
-          this.favorites.splice(index, 1);
-        }
-      });
-      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
-      const msg = {
-        icon: 'success',
-        title: '已刪除我的最愛',
-      };
-      vm.$store.dispatch('alertMessageModules/openToast', msg);
-      vm.getFavorites();
-
-      // 若在 Products 或 Product 頁則重整內頁我的最愛
-      const routerName = vm.$refs.view.$route.name;
-      if (routerName === 'Product' || routerName === 'Products') {
-        vm.$refs.view.getFavorites();
-      }
+    delFavoriteItem(item) {
+      const { routerName } = this;
+      this.$store.dispatch('favoriteModules/delFavoriteItem', item)
+        .then(() => {
+          if (routerName === 'Products') {
+            this.$refs.view.getFavorites();
+          }
+        });
     },
     delFavoriteAll() {
-      const vm = this;
-      vm.$swal({
+      const { routerName } = this;
+      this.$swal({
         title: '刪除我的最愛',
         text: '確定要刪除全部我的最愛 (刪除後無法復原)',
         showCancelButton: true,
@@ -236,19 +216,12 @@ export default {
         },
       }).then((result) => {
         if (result.isConfirmed) {
-          localStorage.removeItem('favoriteData');
-          const msg = {
-            icon: 'success',
-            title: '已刪除全部我的最愛',
-          };
-          vm.$store.dispatch('alertMessageModules/openToast', msg);
-          vm.getFavorites();
-
-          // 若在 Products 或 Product 頁則重整內頁我的最愛
-          const routerName = vm.$refs.view.$route.name;
-          if (routerName === 'Product' || routerName === 'Products') {
-            vm.$refs.view.getFavorites();
-          }
+          this.$store.dispatch('favoriteModules/delFavoriteAll')
+            .then(() => {
+              if (routerName === 'Products') {
+                this.$refs.view.getFavorites();
+              }
+            });
         }
       });
     },
@@ -274,6 +247,7 @@ export default {
   },
   computed: {
     ...mapGetters(['isLoading']),
+    ...mapGetters('favoriteModules', ['favorites', 'favoritesNum']),
   },
   watch: {
     $route(to, from) {
@@ -288,7 +262,7 @@ export default {
   created() {
     const vm = this;
     vm.getCarts();
-    vm.getFavorites();
+    vm.$store.dispatch('favoriteModules/getFavorites');
     vm.scrollPage();
   },
 };
