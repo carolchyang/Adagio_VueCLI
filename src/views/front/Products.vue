@@ -23,9 +23,11 @@
           </div>
 
           <div class="input-group search-inputgroup">
-            <input type="text" class="form-control" placeholder="請輸入搜尋商品">
+            <input type="text" class="form-control" placeholder="請輸入搜尋商品"
+             v-model.trim="searchText" @keyup.enter="search()">
             <div class="input-group-append">
-              <button class="btn btn-dark rounded-right" type="button">
+              <button class="btn btn-dark rounded-right" type="button"
+               @click.prevent="search()">
                 搜尋
               </button>
             </div>
@@ -35,7 +37,7 @@
         <div class="col-12 col-md-7 col-lg-9">
 
           <div class="products-info" v-if="filterText">
-            搜尋到 2 筆 "{{ filterText }}" 資料
+            搜尋到 {{ filterData.length }} 筆 "{{ filterText }}" 資料
           </div>
 
           <div class="row">
@@ -286,6 +288,11 @@ export default {
 
       // 切換分類，更新頁碼資訊
       vm.updataPagination();
+
+      // 切換分類，清除搜尋
+      if (vm.filterText) {
+        vm.filterText = '';
+      }
     },
     updataPagination() {
       const vm = this;
@@ -303,6 +310,25 @@ export default {
         current_page: 1,
       };
     },
+    search() {
+      const vm = this;
+      if (vm.searchText) {
+        vm.filterCategory = '全部';
+        vm.filterText = vm.searchText;
+
+        // 切換分類，更新頁碼資訊
+        vm.updataPagination();
+
+        vm.searchText = '';
+      } else {
+        const msg = {
+          title: '請輸入搜尋文字',
+          text: '搜尋內容為空，請輸入搜尋文字',
+          status: 'danger',
+        };
+        vm.$bus.$emit('alertMessage', msg);
+      }
+    },
     changePage(currentPage) {
       this.currentPage = currentPage;
       this.pagination.current_page = Number(currentPage);
@@ -312,6 +338,11 @@ export default {
     newProducts() {
       const vm = this;
 
+      // 有搜尋字串
+      if (vm.filterText) {
+        vm.filterCategory = '全部';
+        return vm.products.filter((item) => item.title.indexOf(vm.filterText) !== -1);
+      }
       // 分類不為全部
       if (vm.filterCategory !== '全部') {
         return vm.products.filter((item) => item.category === vm.filterCategory);
