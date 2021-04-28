@@ -38,7 +38,7 @@
 
           <div class="row">
             <div class="col-12 col-lg-6 col-xl-4"
-             v-for="product in products"
+             v-for="product in filterData"
               :key="product.id">
               <router-link :to="`/products/${product.id}`" class="card">
                 <div class="card-head">
@@ -86,30 +86,7 @@
           </div>
 
           <div class="products-pagination">
-            <nav aria-label="Page navigation">
-              <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                  <a class="page-link" href="#" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                  </a>
-                </li>
-                <li class="page-item active">
-                  <a class="page-link" href="#">
-                    1
-                  </a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="#">
-                    2
-                  </a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="#" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                  </a>
-                </li>
-              </ul>
-            </nav>
+            <Pagination :pagination="pagination" @get-data="changePage"/>
           </div>
         </div>
 
@@ -120,6 +97,7 @@
 </template>
 
 <script>
+import Pagination from '@/components/Pagination.vue';
 import categoryImgAllmenu from '@/assets/images/banner-allmenu.jpg';
 import categoryImgMaintmeal from '@/assets/images/banner-mainmeal.jpg';
 import categoryImgLightmeal from '@/assets/images/banner-lightmeal.jpg';
@@ -131,12 +109,13 @@ export default {
   data() {
     return {
       isLoading: false,
+      // 頁碼相關
+      currentPage: 1, // 所在頁面
       pagination: {
-        total: 3,
-        count: 3,
-        per_page: 25,
-        current_page: 1,
-        total_pages: 1,
+        perpage: 6, // 一面有幾個商品
+        result_length: 0, // 商品數量
+        total_pages: 1, // 總共有幾頁
+        current_page: 1, // 所在頁面
       },
       carts: [],
       favorites: [],
@@ -175,6 +154,15 @@ export default {
       vm.isLoading = true;
       vm.$http.get(url).then((res) => {
         vm.products = res.data.data;
+
+        // 設定預設頁碼
+        const resultLen = vm.products.length;
+        vm.pagination = {
+          perpage: 6, // 一面有幾個商品
+          result_length: resultLen,
+          total_pages: Math.ceil(resultLen / Number(vm.pagination.perpage)),
+          current_page: 1,
+        };
 
         vm.getCarts();
         vm.getFavorites();
@@ -282,6 +270,35 @@ export default {
       vm.$emit('get-favorites');
       vm.getFavorites();
     },
+    changePage(currentPage) {
+      this.currentPage = currentPage;
+      this.pagination.current_page = Number(currentPage);
+    },
+  },
+  computed: {
+    filterData() {
+      const vm = this;
+      const data = [];
+
+      // 顯示當前頁面資料
+      const perpage = Number(vm.pagination.perpage);
+      const currentPage = Number(vm.pagination.current_page);
+
+      // 取此頁碼最大及最小資料為第?筆
+      const minItem = (currentPage * perpage) - perpage + 1;
+      const maxItem = currentPage * perpage;
+
+      vm.products.forEach((item, i) => {
+        const itemNum = i + 1;
+        if (itemNum >= minItem && itemNum <= maxItem) {
+          data.push(item);
+        }
+      });
+      return data;
+    },
+  },
+  components: {
+    Pagination,
   },
   created() {
     this.getProducts();
