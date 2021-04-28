@@ -268,7 +268,24 @@ export default {
       vm.isLoading = true;
       vm.$http.get(url).then((res) => {
         vm.products = res.data.data;
+
+        vm.getFavorites();
+
         vm.isLoading = false;
+      });
+    },
+    getFavorites() {
+      const vm = this;
+      vm.favorites = JSON.parse(localStorage.getItem('favoriteData')) || [];
+
+      // 查詢各商品是否有在我的最愛中，有則加入 isFavorite:true，否則加入 isFavorite:false
+      vm.products.forEach((productItem, index) => {
+        this.$set(vm.products[index], 'isFavorite', false);
+        vm.favorites.forEach((favoriteItem) => {
+          if (productItem.id === favoriteItem.id) {
+            this.$set(vm.products[index], 'isFavorite', true);
+          }
+        });
       });
     },
   },
