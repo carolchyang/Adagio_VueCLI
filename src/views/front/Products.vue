@@ -1,5 +1,7 @@
 <template>
   <div class="products-wrap">
+    <loading :active.sync="isLoading" :is-full-page="true"></loading>
+
     <div class="pagebanner" :style="{backgroundImage: 'url(' + categoryImg + ')'}">
       <h2>產品列表</h2>
     </div>
@@ -169,7 +171,6 @@ export default {
           current_page: 1,
         };
 
-        vm.getCarts();
         vm.getFavorites();
 
         vm.isLoading = false;
@@ -282,7 +283,7 @@ export default {
       // 切換分類，更換封面圖
       vm.categories.forEach((item, index) => {
         if (item.title === vm.filterCategory) {
-          vm.bannerImg = vm.categories[index].bannerImg;
+          vm.categoryImg = vm.categories[index].categoryImg;
         }
       });
 
@@ -375,6 +376,7 @@ export default {
   },
   created() {
     this.getProducts();
+    this.getCarts();
   },
 };
 </script>
