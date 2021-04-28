@@ -201,58 +201,64 @@
 
         <h2 class="checkorder-title">訂購資料</h2>
 
-        <form tag="form">
+        <ValidationObserver v-slot="{ invalid }" tag="form"
+         @submit.prevent="createOrder()">
 
           <div class="bg-light  mb-3 mb-md-5 p-4">
             <div class="form-row">
-              <div class="form-group col-md-6" name="收件人姓名">
+              <ValidationProvider class="form-group col-md-6" name="收件人姓名"
+               rules="required" tag="div" v-slot="{ errors, classes }">
                   <label for="name">
                     <span class="text-danger">*</span>
                     收件人姓名：
                   </label>
                   <input type="text" id="name" class="form-control" placeholder="請輸入收件人姓名"
-                   v-model="orderData.name" required>
-                  <span class="invalid-feedback"></span>
-              </div>
+                  :class="classes" v-model="orderData.name" required>
+                  <span class="invalid-feedback">{{ errors[0] }}</span>
+              </ValidationProvider>
 
-              <div class="form-group col-md-6" name="收件人電話">
+              <ValidationProvider class="form-group col-md-6" name="收件人電話"
+               rules="required" tag="div" v-slot="{ errors, classes }">
                   <label for="tel">
                     <span class="text-danger">*</span>
                     收件人電話：
                   </label>
                   <input type="text" id="tel" class="form-control" placeholder="請輸入收件人電話"
-                   v-model="orderData.tel" required>
-                  <span class="invalid-feedback"></span>
-              </div>
+                  :class="classes" v-model="orderData.tel" required>
+                  <span class="invalid-feedback">{{ errors[0] }}</span>
+              </ValidationProvider>
             </div>
 
-            <div class="form-group">
+            <ValidationProvider class="form-group" name="電子郵件" rules="required|email" tag="div"
+             v-slot="{ errors, classes }">
               <label for="email">
                 <span class="text-danger">*</span>
                 電子郵件：
               </label>
               <input type="email" id="email" class="form-control" placeholder="請輸入電子郵件"
-               v-model="orderData.email" required>
-              <span class="invalid-feedback"></span>
-            </div>
+              :class="classes" v-model="orderData.email" required>
+              <span class="invalid-feedback">{{ errors[0] }}</span>
+            </ValidationProvider>
 
-            <div class="form-group">
+            <ValidationProvider class="form-group" name="收件地址" rules="required" tag="div"
+             v-slot="{ errors, classes }">
               <label for="address">
                 <span class="text-danger">*</span>
                 收件地址：
               </label>
               <input type="text" id="address" class="form-control" placeholder="請輸入收件地址"
-               v-model="orderData.address" required>
-              <span class="invalid-feedback"></span>
-            </div>
+              :class="classes" v-model="orderData.address" required>
+              <span class="invalid-feedback">{{ errors[0] }}</span>
+            </ValidationProvider>
 
-            <div class="form-group">
+            <ValidationProvider class="form-group" name="支付方式" rules="required" tag="div"
+             v-slot="{ errors, classes }">
               <label for="payment">
                 <span class="text-danger">*</span>
                 支付方式
               </label>
-              <select id="payment" class="form-control" name="支付方式"
-               v-model="orderData.payment" required>
+              <select id="payment" class="form-control" name="支付方式" :class="classes"
+              v-model="orderData.payment" required>
                 <option selected="selected" disabled value="">請選擇支付方式</option>
                 <option value="WebATM">WebATM</option>
                 <option value="ATM">ATM</option>
@@ -262,8 +268,8 @@
                 <option value="ApplePay">ApplePay</option>
                 <option value="GooglePay">GooglePay</option>
               </select>
-              <span class="invalid-feedback"></span>
-            </div>
+              <span class="invalid-feedback">{{ errors[0] }}</span>
+            </ValidationProvider>
 
             <div class="form-group">
               <label for="message">備註：</label>
@@ -281,14 +287,14 @@
               </span>
               回上一步
             </button>
-            <button type="submut" class="btn btn-dark btn-lg">
+            <button type="submut" class="btn btn-dark btn-lg" :disabled="cartsNum && invalid">
               確認結帳
               <span class="ml-1">
               <i class="fas fa-arrow-alt-circle-right"></i>
               </span>
             </button>
           </div>
-        </form>
+        </ValidationObserver>
 
       </div>
 
@@ -305,7 +311,6 @@ export default {
       step: 1,
       couponInput: '',
       coupon: {},
-      isCreateOrderAllow: true,
       orderData: {
         name: '',
         email: '',
@@ -434,6 +439,37 @@ export default {
         });
         vm.cartsNum = num;
         vm.totalMoney = total;
+        vm.isLoading = false;
+      });
+    },
+    createOrder() {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/orders`;
+      vm.isLoading = true;
+      vm.$http.post(url, vm.orderData).then((res) => {
+        vm.isLoading = false;
+        const { id } = res.data.data;
+        vm.getCarts();
+        vm.$swal({
+          title: '已成立訂單',
+          text: '訂單已成立，請盡速結帳喔!!',
+          showCancelButton: false,
+          confirmButtonColor: '#28a745',
+          allowOutsideClick: false,
+          confirmButtonText: '確認',
+          customClass: {
+            title: 'swal-title swal-title-success',
+          },
+        }).then(() => {
+          vm.$router.push({ name: 'Order', params: { orderId: id } });
+        });
+      }).catch(() => {
+        const msg = {
+          title: '錯誤',
+          text: '出錯了~ 請重新訂購',
+          status: 'danger',
+        };
+        vm.$bus.$emit('alertmessage', msg);
         vm.isLoading = false;
       });
     },
