@@ -1,6 +1,5 @@
 <template>
   <div class="login">
-    <AlertMessage/>
     <loading :active.sync="isLoading" :is-full-page="true"></loading>
 
     <h1 class="logo">Adagio</h1>
@@ -38,13 +37,12 @@
 </template>
 
 <script>
-import AlertMessage from '@/components/AlertMessage.vue';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'Login',
   data() {
     return {
-      isLoading: false,
       auth: {
         email: '',
         password: '',
@@ -55,30 +53,32 @@ export default {
     login() {
       const vm = this;
       const apiUrl = `${process.env.VUE_APP_APIPATH}/auth/login`;
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.post(apiUrl, vm.auth).then((res) => {
         const { token, expired } = res.data;
-        document.cookie = `hexToken=${token}; expries=${new Date(expired * 1000)}; path=/`;
-        vm.isLoading = false;
+        document.cookie = `hexToken=${token};expires=${new Date(expired * 1000)}; path=/`;
+        vm.$store.dispatch('updateLoading', false, { root: true });
+
         const msg = {
           icon: 'success',
           title: '登入成功',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
 
         vm.$router.push('/admin/productsmanage');
       }).catch(() => {
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
+
         const msg = {
           icon: 'error',
           title: '登入失敗',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       });
     },
   },
-  components: {
-    AlertMessage,
+  computed: {
+    ...mapGetters(['isLoading']),
   },
 };
 </script>

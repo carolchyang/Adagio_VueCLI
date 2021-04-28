@@ -1,7 +1,5 @@
 <template>
   <div>
-    <loading :active.sync="isLoading" :is-full-page="true"></loading>
-
     <div class="mb-4 text-right">
       <button type="button" class="btn btn-dark" @click.prevent="openModal('create')">
         新增產品
@@ -192,7 +190,6 @@ export default {
   name: 'ProductsManage',
   data() {
     return {
-      isLoading: false,
       products: [],
       pagination: {},
       tempProduct: {
@@ -208,11 +205,11 @@ export default {
     getProducts(page = 1) {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/products?page=${page}&paged=10`;
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.get(url).then((res) => {
         vm.products = res.data.data;
         vm.pagination = res.data.meta.pagination;
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
       });
     },
     openModal(status, item) {
@@ -253,47 +250,47 @@ export default {
         statusTitle = '更新';
       }
 
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http[method](url, vm.tempProduct).then(() => {
         $('#editModal').modal('hide');
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         vm.getProducts();
         const msg = {
           icon: 'success',
           title: `${statusTitle}產品成功`,
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       }).catch(() => {
         $('#editModal').modal('hide');
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         const msg = {
           icon: 'error',
           title: `${statusTitle}產品失敗`,
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       });
     },
     delProduct() {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/product/${vm.tempProduct.id}`;
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.delete(url).then(() => {
         $('#delModal').modal('hide');
         vm.getProducts();
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         const msg = {
           icon: 'success',
           title: '刪除產品成功',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       }).catch(() => {
         $('#delModal').modal('hide');
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         const msg = {
           icon: 'error',
           title: '刪除產品失敗',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       });
     },
     uploadFile() {
@@ -302,7 +299,7 @@ export default {
       const file = vm.$refs.file.files[0];
       const formData = new FormData();
       formData.append('file', file);
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.post(url, formData, {
         header: {
           'Content-Type': 'multipart/form-data',
@@ -314,19 +311,19 @@ export default {
           array.push(res.data.data.path);
           vm.tempProduct.imageUrl = array;
         }
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         const msg = {
           icon: 'success',
           title: '上傳圖檔成功',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       }).catch(() => {
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         const msg = {
           icon: 'error',
           title: '上傳圖檔失敗，請確認檔案大小',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       });
     },
   },

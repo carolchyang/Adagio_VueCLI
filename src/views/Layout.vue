@@ -1,6 +1,5 @@
 <template>
   <div>
-    <AlertMessage/>
     <loading :active.sync="isLoading" :is-full-page="true"></loading>
 
     <div class="header-wrap" :class="{'header-scroll': isMenuOpen || scrollHeader}">
@@ -138,13 +137,12 @@
 
 <script>
 /* global $ */
-import AlertMessage from '@/components/AlertMessage.vue';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'Layout',
   data() {
     return {
-      isLoading: false,
       scrollHeader: false,
       isMenuOpen: false,
       routerName: this.$route.name,
@@ -158,7 +156,7 @@ export default {
     getCarts() {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-      vm.isLoading = false;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.get(url).then((res) => {
         let num = 0;
         vm.carts = res.data.data;
@@ -166,20 +164,20 @@ export default {
           num += item.quantity;
         });
         vm.cartsNum = num;
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
       });
     },
     delCartItem(id) {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping/${id}`;
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.delete(url, { product: id }).then(() => {
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         const msg = {
           icon: 'success',
           title: '已刪除此筆資料',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
         vm.getCarts();
 
         // 若在 checkorder 或 Products 或 Product 頁則重整內頁購物車
@@ -188,12 +186,12 @@ export default {
           vm.$refs.view.getCarts();
         }
       }).catch(() => {
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         const msg = {
           icon: 'error',
           title: '刪除購物車失敗',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       });
     },
     getFavorites() {
@@ -214,7 +212,7 @@ export default {
         icon: 'success',
         title: '已刪除我的最愛',
       };
-      vm.$bus.$emit('alertmessage', msg);
+      vm.$store.dispatch('alertMessageModules/openToast', msg);
       vm.getFavorites();
 
       // 若在 Products 或 Product 頁則重整內頁我的最愛
@@ -243,7 +241,7 @@ export default {
             icon: 'success',
             title: '已刪除全部我的最愛',
           };
-          vm.$bus.$emit('alertmessage', msg);
+          vm.$store.dispatch('alertMessageModules/openToast', msg);
           vm.getFavorites();
 
           // 若在 Products 或 Product 頁則重整內頁我的最愛
@@ -274,8 +272,8 @@ export default {
       }
     },
   },
-  components: {
-    AlertMessage,
+  computed: {
+    ...mapGetters(['isLoading']),
   },
   watch: {
     $route(to, from) {

@@ -1,7 +1,5 @@
 <template>
   <div class="products-wrap">
-    <loading :active.sync="isLoading" :is-full-page="true"></loading>
-
     <div class="pagebanner" :style="{backgroundImage: 'url(' + categoryImg + ')'}">
       <h2>產品列表</h2>
     </div>
@@ -114,7 +112,6 @@ export default {
   name: 'Products',
   data() {
     return {
-      isLoading: false,
       // 頁碼相關
       currentPage: 1, // 所在頁面
       pagination: {
@@ -158,7 +155,7 @@ export default {
     getProducts() {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/products`;
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.get(url).then((res) => {
         vm.products = res.data.data;
 
@@ -174,16 +171,16 @@ export default {
         vm.getQuery();
         vm.getFavorites();
 
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
       });
     },
     getCarts() {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.get(url).then((res) => {
         vm.carts = res.data.data;
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
       });
     },
     updateCartItem(id, num) {
@@ -205,9 +202,9 @@ export default {
         product: id,
         quantity: n,
       };
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http[method](url, data).then(() => {
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         vm.getCarts();
         vm.$emit('get-carts');
 
@@ -215,15 +212,15 @@ export default {
           icon: 'success',
           title: '更新購物車成功',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       }).catch(() => {
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
 
         const msg = {
           icon: 'error',
           title: '更新購物車失敗',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       });
     },
     getFavorites() {
@@ -254,7 +251,7 @@ export default {
         icon: 'success',
         title: '已加入我的最愛',
       };
-      vm.$bus.$emit('alertmessage', msg);
+      vm.$store.dispatch('alertMessageModules/openToast', msg);
 
       vm.$emit('get-favorites');
       vm.getFavorites();
@@ -272,7 +269,7 @@ export default {
         icon: 'success',
         title: '已刪除我的最愛',
       };
-      vm.$bus.$emit('alertmessage', msg);
+      vm.$store.dispatch('alertMessageModules/openToast', msg);
 
       vm.$emit('get-favorites');
       vm.getFavorites();
@@ -340,7 +337,7 @@ export default {
           text: '搜尋內容為空，請輸入搜尋文字',
           status: 'danger',
         };
-        vm.$bus.$emit('alertmessage', msg, 'modal');
+        vm.$store.dispatch('alertMessageModules/openModal', msg);
       }
     },
     changePage(currentPage) {

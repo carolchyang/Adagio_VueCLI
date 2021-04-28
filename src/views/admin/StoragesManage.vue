@@ -1,6 +1,5 @@
 <template>
     <div class="container-fluid">
-    <loading :active.sync="isLoading" :is-full-page="true"></loading>
 
     <div class="row">
       <div class="col-12 col-lg-6 col-xl-4" v-for="item in storages" :key="item.id">
@@ -60,7 +59,6 @@ export default {
   name: 'StoragesManage',
   data() {
     return {
-      isLoading: false,
       pagination: {},
       storages: {},
       tempStorage: {},
@@ -70,34 +68,34 @@ export default {
     getStorages(page = 1) {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/storage?page=${page}&paged=6`;
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.get(url).then((res) => {
         vm.storages = res.data.data;
         vm.pagination = res.data.meta.pagination;
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
       });
     },
     delStorage() {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/storage/${vm.tempStorage.id}`;
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.delete(url).then(() => {
         $('#delModal').modal('hide');
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         vm.getStorages();
         const msg = {
           icon: 'success',
           title: '刪除圖片成功',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       }).catch(() => {
         $('#delModal').modal('hide');
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         const msg = {
           icon: 'error',
           title: '刪除圖片失敗',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
       });
     },
     openDelModal(item) {
