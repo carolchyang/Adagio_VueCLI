@@ -127,7 +127,7 @@
         <div class="input-group mb-4 mb-xl-5" v-show="cartsNum">
           <input type="text" class="form-control" placeholder="請輸入折價券代碼" v-model.trim="couponInput">
           <div class="input-group-append">
-            <button type="button" class="btn btn-dark">
+            <button type="button" class="btn btn-dark" @click.prevent="getCoupon()">
               使用 Coupon 券
             </button>
           </div>
@@ -304,28 +304,7 @@ export default {
       isLoading: false,
       step: 1,
       couponInput: '',
-      coupon: {
-        id: 'n6ZmDYhUpW9khDOgccsnRDiwiUlYSCHOpH34egbM82PZB8dkPwGq1zjBjDFG5WI5',
-        title: '週年慶 全品項打八折',
-        code: 'xxxxx-xxxxx-xxxxx-xxxxx',
-        percent: 80,
-        enabled: true,
-        deadline: {
-          diff: '1秒前',
-          datetime: '2019-12-31 01:23:45',
-          timestamp: 1577755425,
-        },
-        created: {
-          diff: '1秒前',
-          datetime: '2019-12-31 01:23:45',
-          timestamp: 1577755425,
-        },
-        updated: {
-          diff: '1秒前',
-          datetime: '2019-12-31 01:23:45',
-          timestamp: 1577755425,
-        },
-      },
+      coupon: {},
       isCreateOrderAllow: true,
       orderData: {
         name: '',
@@ -399,6 +378,44 @@ export default {
         };
         vm.$bus.$emit('alertmessage', msg);
 
+        vm.isLoading = false;
+      });
+    },
+    getCoupon() {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/coupon/search`;
+      vm.isLoading = true;
+      vm.coupon = {};
+      vm.orderData.coupon = '';
+
+      if (!vm.couponInput) {
+        vm.isLoading = false;
+        const msg = {
+          title: '錯誤',
+          text: '請輸入折價劵代碼',
+          status: 'danger',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+        return;
+      }
+
+      vm.$http.post(url, { code: vm.couponInput }).then((res) => {
+        vm.coupon = res.data.data;
+        vm.orderData.coupon = res.data.data.code;
+        const msg = {
+          icon: 'success',
+          title: '已成功使用此 Coupon 券',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+
+        vm.couponInput = '';
+        vm.isLoading = false;
+      }).catch(() => {
+        const msg = {
+          icon: 'error',
+          title: '出錯了~ 此 Coupon 券無效',
+        };
+        vm.$bus.$emit('alertmessage', msg);
         vm.isLoading = false;
       });
     },
