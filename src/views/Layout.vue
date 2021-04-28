@@ -182,9 +182,9 @@ export default {
         vm.$bus.$emit('alertmessage', msg);
         vm.getCarts();
 
-        // 若在 Products 或 Product 頁則重整內頁購物車
+        // 若在 checkorder 或 Products 或 Product 頁則重整內頁購物車
         const routerName = vm.$refs.view.$route.name;
-        if (routerName === 'Product' || routerName === 'Products') {
+        if (routerName === 'Products' || routerName === 'Product' || routerName === 'CreateOrder') {
           vm.$refs.view.getCarts();
         }
       }).catch(() => {
