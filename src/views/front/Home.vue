@@ -37,19 +37,22 @@
 
     <div class="intro">
       <div class="intro-item intro-img1">
-        <router-link class="intro-content" to="/products">
+        <router-link class="intro-content"
+          :to="{ name: 'Products', query: { categoryName: '主餐' }}">
           <h4 class="intro-title">精選主餐</h4>
           <p class="intro-text">精心製作的餐點，給您充滿視覺與味覺的美食饗宴</p>
         </router-link>
       </div>
       <div class="intro-item intro-img2">
-        <router-link class="intro-content" to="/products">
+        <router-link class="intro-content"
+          :to="{ name: 'Products', query: { categoryName: '甜點' }}">
           <h4 class="intro-title">必吃甜點</h4>
           <p class="intro-text">精緻夢幻甜點，是不容錯過的經典好味道。</p>
         </router-link>
       </div>
       <div class="intro-item intro-img3">
-        <router-link class="intro-content" to="/products">
+        <router-link class="intro-content"
+          :to="{ name: 'Products', query: { categoryName: '飲品' }}">
           <h4 class="intro-title">特調飲品</h4>
           <p class="intro-text">獨家研發的特調黃金比例，值得您來細細品嚐。</p>
         </router-link>

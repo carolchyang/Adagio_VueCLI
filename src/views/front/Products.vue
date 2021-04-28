@@ -171,6 +171,7 @@ export default {
           current_page: 1,
         };
 
+        vm.getQuery();
         vm.getFavorites();
 
         vm.isLoading = false;
@@ -275,6 +276,18 @@ export default {
 
       vm.$emit('get-favorites');
       vm.getFavorites();
+    },
+    getQuery() {
+      const vm = this;
+      const { categoryName } = vm.$route.query;
+      if (categoryName) {
+        vm.filterCategory = categoryName;
+        vm.categories.forEach((item, index) => {
+          if (item.title === vm.filterCategory) {
+            vm.bannerImg = vm.categories[index].bannerImg;
+          }
+        });
+      }
     },
     getCategory(category) {
       const vm = this;
