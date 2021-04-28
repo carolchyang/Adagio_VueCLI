@@ -408,62 +408,14 @@ export default {
   }
 }
 
-.product-subtitle {
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid $dark;
-  text-align: left;
-  font-size: 1.25rem;
-}
-
-.product-text {
-  margin-bottom: 1.5rem;
-  padding-bottom: 0;
-  text-align: left;
-  line-height: 1.75;
-}
-
-// counter
-
 .counter {
-  display: flex;
   width: 100%;
   max-width: 100%;
-  margin: 0 auto 1.5rem;
+  margin-bottom: 1.5rem;
   @include mobile {
     max-width: 10rem;
     margin: 0;
   }
-}
-
-.counter-input {
-  width: 100%;
-  padding: 0.25rem;
-  border: 1px solid $dark;
-  border-radius: 0;
-  text-align: center;
-  outline: none;
-  cursor: context-menu;
-}
-
-.addNum, .lessNum {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid $dark;
-  color: $dark;
-  &:hover, &:focus {
-    color: $white;
-    background-color: darken($dark, 10%);
-  }
-}
-
-.lessNum {
-  border-right: none;
-  border-radius: 0.25rem 0 0 0.25rem;
-}
-
-.addNum {
-  border-left: none;
-  border-radius: 0 0.25rem 0.25rem 0;
 }
 
 .product-subtitle {

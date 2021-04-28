@@ -32,6 +32,47 @@ $font-logo: 'Kaushan Script', cursive;
   }
 }
 
+// counter
+
+.counter {
+  display: flex;
+  max-width: 10rem;
+  margin: 0 auto 1rem;
+  @include mobile {
+    margin-bottom: 0;
+  }
+}
+
+.counter-input {
+  width: 100%;
+  padding: 0.25rem;
+  border: 1px solid $dark;
+  border-radius: 0;
+  text-align: center;
+  outline: none;
+  cursor: context-menu;
+}
+
+.addNum, .lessNum {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid $dark;
+  color: $dark;
+  &:hover, &:focus {
+    color: $white;
+    background-color: darken($dark, 10%);
+  }
+}
+
+.lessNum {
+  border-right: none;
+  border-radius: 0.25rem 0 0 0.25rem;
+}
+
+.addNum {
+  border-left: none;
+  border-radius: 0 0.25rem 0.25rem 0;
+}
+
 //favorite-icon
 
 .favorite-icon {
