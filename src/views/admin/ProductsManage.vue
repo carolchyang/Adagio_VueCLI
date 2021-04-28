@@ -183,6 +183,7 @@
 
 <script>
 /* global $ */
+import { mapGetters } from 'vuex';
 import { VueEditor } from 'vue2-editor';
 import Pagination from '@/components/Pagination.vue';
 
@@ -190,7 +191,6 @@ export default {
   name: 'ProductsManage',
   data() {
     return {
-      products: [],
       pagination: {},
       tempProduct: {
         imageUrl: [],
@@ -203,14 +203,11 @@ export default {
   },
   methods: {
     getProducts(page = 1) {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/admin/ec/products?page=${page}&paged=10`;
-      vm.$store.dispatch('updateLoading', true, { root: true });
-      vm.$http.get(url).then((res) => {
-        vm.products = res.data.data;
-        vm.pagination = res.data.meta.pagination;
-        vm.$store.dispatch('updateLoading', false, { root: true });
-      });
+      const routerName = this.$route.name;
+      this.$store.dispatch('productsModules/getProducts', { routerName, page })
+        .then((res) => {
+          this.pagination = res.data.meta.pagination;
+        });
     },
     openModal(status, item) {
       this.status = '';
@@ -326,6 +323,9 @@ export default {
         vm.$store.dispatch('alertMessageModules/openToast', msg);
       });
     },
+  },
+  computed: {
+    ...mapGetters('productsModules', ['products']),
   },
   components: {
     VueEditor,

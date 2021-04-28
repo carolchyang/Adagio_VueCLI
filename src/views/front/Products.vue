@@ -102,13 +102,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-
 import Pagination from '@/components/Pagination.vue';
-import categoryImgAllmenu from '@/assets/images/banner-allmenu.jpg';
-import categoryImgMaintmeal from '@/assets/images/banner-mainmeal.jpg';
-import categoryImgLightmeal from '@/assets/images/banner-lightmeal.jpg';
-import categoryImgDessert from '@/assets/images/banner-dessert.jpg';
-import categoryImgDrinks from '@/assets/images/banner-drinks.jpg';
 
 export default {
   name: 'Products',
@@ -122,30 +116,6 @@ export default {
         total_pages: 1, // 總共有幾頁
         current_page: 1, // 所在頁面
       },
-      categoryImg: categoryImgAllmenu,
-      categories: [
-        {
-          title: '全部',
-          categoryImg: categoryImgAllmenu,
-        },
-        {
-          title: '主餐',
-          categoryImg: categoryImgMaintmeal,
-        },
-        {
-          title: '輕食',
-          categoryImg: categoryImgLightmeal,
-        },
-        {
-          title: '甜點',
-          categoryImg: categoryImgDessert,
-        },
-        {
-          title: '飲品',
-          categoryImg: categoryImgDrinks,
-        },
-      ],
-      products: [],
       searchText: '',
       filterText: '',
       filterCategory: '全部',
@@ -155,77 +125,43 @@ export default {
     updateCartItem(id, num) {
       this.$store.dispatch('cartModules/updateCartItem', { id, num, method: 'add' });
     },
-    getProducts() {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/products`;
-      vm.$store.dispatch('updateLoading', true, { root: true });
-      vm.$http.get(url).then((res) => {
-        vm.products = res.data.data;
-
-        // 設定預設頁碼
-        const resultLen = vm.products.length;
-        vm.pagination = {
-          perpage: 6, // 一面有幾個商品
-          result_length: resultLen,
-          total_pages: Math.ceil(resultLen / Number(vm.pagination.perpage)),
-          current_page: 1,
-        };
-
-        vm.getQuery();
-        vm.getFavorites();
-
-        vm.$store.dispatch('updateLoading', false, { root: true });
-      });
-    },
-    getFavorites() {
-      const vm = this;
-      vm.$store.dispatch('favoriteModules/getFavorites')
+    getData() {
+      const { categoryName } = this.$route.query;
+      this.$store.dispatch('favoriteModules/getFavorites')
+        .then(() => this.$store.dispatch('productsModules/getProducts', { routerName: this.$route.name }))
         .then(() => {
-          // 查詢各商品是否有在我的最愛中，有則加入 isFavorite:true，否則加入 isFavorite:false
-          vm.products.forEach((productItem, index) => {
-            this.$set(vm.products[index], 'isFavorite', false);
-            vm.favorites.forEach((favoriteItem) => {
-              if (productItem.id === favoriteItem.id) {
-                this.$set(vm.products[index], 'isFavorite', true);
-              }
-            });
-          });
+          if (categoryName) {
+            this.getCategory({ title: categoryName });
+          } else {
+            // 設定預設頁碼
+            const resultLen = this.products.length;
+            this.pagination = {
+              perpage: 6, // 一面有幾個商品
+              result_length: resultLen,
+              total_pages: Math.ceil(resultLen / Number(this.pagination.perpage)),
+              current_page: 1,
+            };
+          }
         });
     },
     addFavorite(item) {
       this.$store.dispatch('favoriteModules/addFavorite', item)
         .then(() => {
-          this.getFavorites();
+          this.$store.dispatch('productsModules/getProducts', { routerName: this.$route.name });
         });
     },
     delFavoriteItem(item) {
       this.$store.dispatch('favoriteModules/delFavoriteItem', item)
         .then(() => {
-          this.getFavorites();
+          this.$store.dispatch('productsModules/getProducts', { routerName: this.$route.name });
         });
-    },
-    getQuery() {
-      const vm = this;
-      const { categoryName } = vm.$route.query;
-      if (categoryName) {
-        vm.filterCategory = categoryName;
-        vm.categories.forEach((item, index) => {
-          if (item.title === vm.filterCategory) {
-            vm.categroyImg = vm.categories[index].categoryImg;
-          }
-        });
-      }
     },
     getCategory(category) {
       const vm = this;
       vm.filterCategory = category.title;
 
       // 切換分類，更換封面圖
-      vm.categories.forEach((item, index) => {
-        if (item.title === vm.filterCategory) {
-          vm.categoryImg = vm.categories[index].categoryImg;
-        }
-      });
+      vm.$store.dispatch('productsModules/updateCategoryImg', vm.filterCategory);
 
       // 切換分類，更新頁碼資訊
       vm.updataPagination();
@@ -312,6 +248,7 @@ export default {
       return data;
     },
     ...mapGetters('cartModules', ['carts']),
+    ...mapGetters('productsModules', ['products', 'categories', 'categoryImg']),
     ...mapGetters('favoriteModules', ['favorites']),
   },
   components: {
@@ -319,7 +256,7 @@ export default {
   },
   created() {
     this.$store.dispatch('cartModules/getCarts');
-    this.getProducts();
+    this.getData();
   },
 };
 </script>

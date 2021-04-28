@@ -126,8 +126,7 @@
       </div>
     </div>
 
-    <router-view @get-carts="getCarts" :key="$route.fullPath"
-     ref="view"></router-view>
+    <router-view :key="$route.fullPath"></router-view>
 
     <div class="footer">
       ⓒ 2020 Adagio by Carol
@@ -157,7 +156,7 @@ export default {
       this.$store.dispatch('favoriteModules/delFavoriteItem', item)
         .then(() => {
           if (routerName === 'Products') {
-            this.$refs.view.getFavorites();
+            this.$store.dispatch('productsModules/getProducts', { routerName });
           }
         });
     },
@@ -179,7 +178,7 @@ export default {
           this.$store.dispatch('favoriteModules/delFavoriteAll')
             .then(() => {
               if (routerName === 'Products') {
-                this.$refs.view.getFavorites();
+                this.$store.dispatch('productsModules/getProducts', { routerName });
               }
             });
         }

@@ -101,13 +101,6 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-
-import categoryImgAllmenu from '@/assets/images/banner-allmenu.jpg';
-import categoryImgMaintmeal from '@/assets/images/banner-mainmeal.jpg';
-import categoryImgLightmeal from '@/assets/images/banner-lightmeal.jpg';
-import categoryImgDessert from '@/assets/images/banner-dessert.jpg';
-import categoryImgDrinks from '@/assets/images/banner-drinks.jpg';
-
 import { Swiper, SwiperSlide } from 'vue-awesome-swiper';
 import 'swiper/css/swiper.css';
 
@@ -116,31 +109,7 @@ export default {
   data() {
     return {
       counterNum: 1,
-      product: [],
-      products: [],
-      categoryImg: categoryImgAllmenu,
-      categories: [
-        {
-          title: '全部',
-          categoryImg: categoryImgAllmenu,
-        },
-        {
-          title: '主餐',
-          categoryImg: categoryImgMaintmeal,
-        },
-        {
-          title: '輕食',
-          categoryImg: categoryImgLightmeal,
-        },
-        {
-          title: '甜點',
-          categoryImg: categoryImgDessert,
-        },
-        {
-          title: '飲品',
-          categoryImg: categoryImgDrinks,
-        },
-      ],
+      categoryName: '',
       swiperOption: {
         slidesPerView: 1,
         spaceBetween: 30,
@@ -164,6 +133,7 @@ export default {
           },
         },
       },
+      routerName: this.$route.name,
     };
   },
   methods: {
@@ -182,46 +152,9 @@ export default {
     },
     getData() {
       const { productId } = this.$route.params;
-      this.getProduct(productId);
-      this.getProducts();
-      this.$store.dispatch('favoriteModules/getFavorites');
-    },
-    getProducts() {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/products`;
-      vm.$store.dispatch('updateLoading', true, { root: true });
-      vm.$http.get(url).then((res) => {
-        vm.products = res.data.data;
-        vm.$store.dispatch('updateLoading', false, { root: true });
-      });
-    },
-    getProduct(productId) {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/product/${productId}`;
-      vm.$store.dispatch('updateLoading', true, { root: true });
-      vm.$http.get(url).then((res) => {
-        vm.product = res.data.data;
-        const categoryName = res.data.data.category;
-        vm.categories.forEach((item, index) => {
-          if (item.title === categoryName) {
-            vm.categoryImg = vm.categories[index].categoryImg;
-          }
-        });
-        vm.$store.dispatch('updateLoading', false, { root: true });
-      }).catch(() => {
-        vm.$store.dispatch('updateLoading', false, { root: true });
-        vm.$swal({
-          title: '錯誤',
-          text: '找不到此商品，將返回商品頁',
-          confirmButtonColor: '#dc3545',
-          confirmButtonText: '確認',
-          customClass: {
-            title: 'swal-title swal-title-danger',
-          },
-        }).then(() => {
-          vm.$router.push('/products');
-        });
-      });
+      this.$store.dispatch('productsModules/getProduct', { productId });
+      this.$store.dispatch('favoriteModules/getFavorites')
+        .then(() => this.$store.dispatch('productsModules/getProducts', { routerName: this.$route.name, productId }));
     },
     addFavorite(item) {
       this.$store.dispatch('favoriteModules/addFavorite', item);
@@ -247,6 +180,8 @@ export default {
     },
     ...mapGetters('cartModules', ['carts']),
     ...mapGetters('favoriteModules', ['favorites']),
+    ...mapGetters('productsModules', ['products', 'product', 'categories', 'categoryImg']),
+
   },
   components: {
     Swiper,
