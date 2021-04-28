@@ -49,54 +49,54 @@ export default {
 };
 </script>
 
-<style lang="scss">
-@import '../assets/scss/all.scss';
+// <style lang="scss">
+// @import '../assets/scss/all.scss';
 
-// 更改 vue-sweetalert2 預設樣式
-.swal2-toast {
-  min-width: 15rem;
-}
+// // 更改 vue-sweetalert2 預設樣式
+// .swal2-toast {
+//   min-width: 15rem;
+// }
 
-@include desktop {
-  .swal2-toast-shown .swal2-container.swal2-center.swal2-backdrop-show {
-    top: 0;
-    transform: translate(-50%,0);
-  }
-}
+// @include desktop {
+//   .swal2-toast-shown .swal2-container.swal2-center.swal2-backdrop-show {
+//     top: 0;
+//     transform: translate(-50%,0);
+//   }
+// }
 
-.swal2-modal {
-  padding: 2rem;
-}
+// .swal2-modal {
+//   padding: 2rem;
+// }
 
-// 自訂 vue-sweetalert2 樣式
+// // 自訂 vue-sweetalert2 樣式
 
-.swal2-title.swal-title {
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  font-size: 1.5rem;
-}
+// .swal2-title.swal-title {
+//   margin-bottom: 1.5rem;
+//   padding-bottom: 0.5rem;
+//   font-size: 1.5rem;
+// }
 
-.swal-title {
-  border-bottom: 4px solid $dark;
-}
+// .swal-title {
+//   border-bottom: 4px solid $dark;
+// }
 
-.swal-title-secondary {
-  border-bottom: 4px solid $secondary;
-}
+// .swal-title-secondary {
+//   border-bottom: 4px solid $secondary;
+// }
 
-.swal-title-success {
-  border-bottom: 4px solid $success;
-}
+// .swal-title-success {
+//   border-bottom: 4px solid $success;
+// }
 
-.swal-title-info {
-  border-bottom: 4px solid $info;
-}
+// .swal-title-info {
+//   border-bottom: 4px solid $info;
+// }
 
-.swal-title-danger {
-  border-bottom: 4px solid $danger;
-}
+// .swal-title-danger {
+//   border-bottom: 4px solid $danger;
+// }
 
-.swal-success {
-  background-color: $success;
-}
-</style>
+// .swal-success {
+//   background-color: $success;
+// }
+// </style>
