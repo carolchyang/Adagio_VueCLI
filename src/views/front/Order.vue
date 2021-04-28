@@ -90,7 +90,7 @@
         </div>
 
         <div class="text-center" v-if="!order.paid">
-          <a href="#" class="btn btn-secondary btn-lg">
+          <a href="#" class="btn btn-secondary btn-lg" @click.prevent="payOrder(orderId)">
             付款去
             <span class="ml-1">
               <i class="fas fa-money-check-alt"></i>
@@ -104,6 +104,8 @@
 </template>
 
 <script>
+import ThanksImg from '@/assets/images/thanks.jpg';
+
 export default {
   name: 'Order',
   data() {
@@ -136,6 +138,36 @@ export default {
         }).then(() => {
           vm.$router.push('/');
         });
+      });
+    },
+    payOrder(id) {
+      const vm = this;
+      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/orders/${id}/paying`;
+      vm.isLoading = true;
+      vm.$http.post(url).then(() => {
+        vm.isLoading = false;
+        vm.getOrder(id);
+        vm.$swal({
+          title: '付款成功',
+          text: '我們已收到您的訂單，感謝您的支持!',
+          showCancelButton: false,
+          confirmButtonColor: '#343a40',
+          allowOutsideClick: false,
+          confirmButtonText: '確認',
+          imageUrl: ThanksImg,
+          customClass: {
+            title: 'swal-title swal-title-secondary',
+          },
+        }).then(() => {
+          vm.$router.push('/');
+        });
+      }).catch(() => {
+        const msg = {
+          icon: 'error',
+          title: '付款失敗',
+        };
+        vm.$bus.$emit('alertmessage', msg);
+        vm.isLoading = false;
       });
     },
   },
