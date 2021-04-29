@@ -1,4 +1,4 @@
-# Adagio 美食電商網站 Vue CLI
+# Adagio 美食購物網站 Vue CLI
 
 ![banner.png](https://i.postimg.cc/4NQzJLdv/banner.png)
 
