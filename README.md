@@ -4,7 +4,7 @@
 
 ## 簡介
 
-以 Vue Cli、 Vuex 及 Vue Router 模擬的美食電商網站
+以 Vue Cli、 Vuex 及 Vue Router 模擬的美食購物網站
 
 * Demo：
 
