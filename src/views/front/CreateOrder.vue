@@ -1,7 +1,5 @@
 <template>
   <div>
-    <loading :active.sync="isLoading" :is-full-page="true"></loading>
-
     <div class="pagebanner pagebanner-img">
       <h2>結帳流程</h2>
     </div>
@@ -51,7 +49,7 @@
                 <div class="counter">
                   <a href="#" class="lessNum"
                    @click.prevent="
-                   updateCartItem(cart.product.id, cart.quantity - 1)"
+                   updateCartItem(cart.product.id, cart.quantity - 1, $event)"
                   >
                     <i class="fas fa-minus"></i>
                   </a>
@@ -59,7 +57,7 @@
                    :value="cart.quantity" class="counter-input">
                   <a href="#" class="addNum"
                    @click.prevent="
-                   updateCartItem(cart.product.id, cart.quantity + 1)"
+                   updateCartItem(cart.product.id, cart.quantity + 1, $event)"
                   >
                     <i class="fas fa-plus"></i>
                   </a>
@@ -303,11 +301,12 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex';
+
 export default {
   name: 'CreateOrder',
   data() {
     return {
-      isLoading: false,
       step: 1,
       couponInput: '',
       coupon: {},
@@ -320,87 +319,38 @@ export default {
         coupon: '',
         message: '',
       },
-      carts: {},
-      cartsNum: 0,
-      totalMoney: 0,
     };
   },
   methods: {
     updateCartItem(id, num) {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-
       if (num <= 0) {
         const msg = {
           icon: 'error',
           title: '商品數量必須大於 1 樣',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        this.$store.dispatch('alertMessageModules/openToast', msg);
       } else {
-        const data = {
-          product: id,
-          quantity: num,
-        };
-        vm.isLoading = true;
-
-        vm.$http.patch(url, data).then(() => {
-          vm.isLoading = false;
-          vm.$emit('get-carts');
-          vm.getCarts();
-          const msg = {
-            icon: 'success',
-            title: '更新購物車成功',
-          };
-          vm.$bus.$emit('alertmessage', msg);
-        }).catch(() => {
-          vm.isLoading = false;
-          const msg = {
-            icon: 'error',
-            title: '更新購物車失敗',
-          };
-          vm.$bus.$emit('alertmessage', msg);
-        });
+        this.$store.dispatch('cartModules/updateCartItem', { id, num, method: 'set' });
       }
     },
     delCartItem(id) {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping/${id}`;
-      vm.isLoading = true;
-      vm.$http.delete(url, { product: id }).then(() => {
-        const msg = {
-          icon: 'success',
-          title: '已刪除此筆資料',
-        };
-        vm.isLoading = false;
-        vm.$bus.$emit('alertmessage', msg);
-
-        vm.$emit('get-carts');
-        vm.getCarts();
-      }).catch(() => {
-        const msg = {
-          icon: 'error',
-          title: '刪除購物車失敗',
-        };
-        vm.$bus.$emit('alertmessage', msg);
-
-        vm.isLoading = false;
-      });
+      this.$store.dispatch('cartModules/delCartItem', id);
     },
     getCoupon() {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/coupon/search`;
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.coupon = {};
       vm.orderData.coupon = '';
 
       if (!vm.couponInput) {
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         const msg = {
           title: '錯誤',
           text: '請輸入折價劵代碼',
           status: 'danger',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openModal', msg);
         return;
       }
 
@@ -411,45 +361,27 @@ export default {
           icon: 'success',
           title: '已成功使用此 Coupon 券',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
 
         vm.couponInput = '';
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
       }).catch(() => {
         const msg = {
           icon: 'error',
           title: '出錯了~ 此 Coupon 券無效',
         };
-        vm.$bus.$emit('alertmessage', msg);
-        vm.isLoading = false;
-      });
-    },
-    getCarts() {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-      vm.isLoading = true;
-      let num = 0;
-      let total = 0;
-      vm.$http.get(url).then((res) => {
-        vm.carts = res.data.data;
-        vm.carts.forEach((item) => {
-          num += Number(item.quantity);
-          const price = item.product.price * item.quantity;
-          total += price;
-        });
-        vm.cartsNum = num;
-        vm.totalMoney = total;
-        vm.isLoading = false;
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
+        vm.$store.dispatch('updateLoading', false, { root: true });
       });
     },
     createOrder() {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/orders`;
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.post(url, vm.orderData).then((res) => {
-        vm.isLoading = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
         const { id } = res.data.data;
-        vm.getCarts();
+        vm.$store.dispatch('cartModules/getCarts');
         vm.$swal({
           title: '已成立訂單',
           text: '訂單已成立，請盡速結帳喔!!',
@@ -469,13 +401,17 @@ export default {
           text: '出錯了~ 請重新訂購',
           status: 'danger',
         };
-        vm.$bus.$emit('alertmessage', msg);
-        vm.isLoading = false;
+        vm.$store.dispatch('alertMessageModules/openModal', msg);
+        vm.$store.dispatch('updateLoading', false, { root: true });
       });
     },
+    ...mapActions('cartModules', ['getCarts']),
+  },
+  computed: {
+    ...mapGetters('cartModules', ['carts', 'cartsNum', 'totalMoney']),
   },
   created() {
-    this.getCarts();
+    this.$store.dispatch('cartModules/getCarts');
   },
 };
 </script>

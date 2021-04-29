@@ -1,7 +1,5 @@
 <template>
   <div class="products-wrap">
-    <loading :active.sync="isLoading" :is-full-page="true"></loading>
-
     <div class="pagebanner" :style="{backgroundImage: 'url(' + categoryImg + ')'}">
       <h2>產品列表</h2>
     </div>
@@ -92,7 +90,7 @@
           </div>
 
           <div class="products-pagination">
-            <Pagination :pagination="pagination" @get-data="changePage"/>
+            <Pagination @get-data="changePage"/>
           </div>
         </div>
 
@@ -103,226 +101,60 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex';
 import Pagination from '@/components/Pagination.vue';
-import categoryImgAllmenu from '@/assets/images/banner-allmenu.jpg';
-import categoryImgMaintmeal from '@/assets/images/banner-mainmeal.jpg';
-import categoryImgLightmeal from '@/assets/images/banner-lightmeal.jpg';
-import categoryImgDessert from '@/assets/images/banner-dessert.jpg';
-import categoryImgDrinks from '@/assets/images/banner-drinks.jpg';
 
 export default {
   name: 'Products',
   data() {
     return {
-      isLoading: false,
-      // 頁碼相關
-      currentPage: 1, // 所在頁面
-      pagination: {
-        perpage: 6, // 一面有幾個商品
-        result_length: 0, // 商品數量
-        total_pages: 1, // 總共有幾頁
-        current_page: 1, // 所在頁面
-      },
-      carts: [],
-      favorites: [],
-      categoryImg: categoryImgAllmenu,
-      categories: [
-        {
-          title: '全部',
-          categoryImg: categoryImgAllmenu,
-        },
-        {
-          title: '主餐',
-          categoryImg: categoryImgMaintmeal,
-        },
-        {
-          title: '輕食',
-          categoryImg: categoryImgLightmeal,
-        },
-        {
-          title: '甜點',
-          categoryImg: categoryImgDessert,
-        },
-        {
-          title: '飲品',
-          categoryImg: categoryImgDrinks,
-        },
-      ],
-      products: [],
       searchText: '',
       filterText: '',
       filterCategory: '全部',
     };
   },
   methods: {
-    getProducts() {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/products`;
-      vm.isLoading = true;
-      vm.$http.get(url).then((res) => {
-        vm.products = res.data.data;
-
-        // 設定預設頁碼
-        const resultLen = vm.products.length;
-        vm.pagination = {
-          perpage: 6, // 一面有幾個商品
-          result_length: resultLen,
-          total_pages: Math.ceil(resultLen / Number(vm.pagination.perpage)),
-          current_page: 1,
-        };
-
-        vm.getQuery();
-        vm.getFavorites();
-
-        vm.isLoading = false;
-      });
-    },
-    getCarts() {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-      vm.isLoading = true;
-      vm.$http.get(url).then((res) => {
-        vm.carts = res.data.data;
-        vm.isLoading = false;
-      });
-    },
     updateCartItem(id, num) {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-      let n = 0;
-      let method = 'post';
-
-      n = Number(num);
-
-      const isInCart = vm.carts.filter((item) => item.product.id === id);
-
-      if (isInCart.length > 0) {
-        method = 'patch';
-        n = Number(isInCart[0].quantity) + Number(num);
-      }
-
-      const data = {
-        product: id,
-        quantity: n,
-      };
-      vm.isLoading = true;
-      vm.$http[method](url, data).then(() => {
-        vm.isLoading = false;
-        vm.getCarts();
-        vm.$emit('get-carts');
-
-        const msg = {
-          icon: 'success',
-          title: '更新購物車成功',
-        };
-        vm.$bus.$emit('alertmessage', msg);
-      }).catch(() => {
-        vm.isLoading = false;
-
-        const msg = {
-          icon: 'error',
-          title: '更新購物車失敗',
-        };
-        vm.$bus.$emit('alertmessage', msg);
-      });
+      this.$store.dispatch('cartModules/updateCartItem', { id, num, method: 'add' });
     },
-    getFavorites() {
-      const vm = this;
-      vm.favorites = JSON.parse(localStorage.getItem('favoriteData')) || [];
-
-      // 查詢各商品是否有在我的最愛中，有則加入 isFavorite:true，否則加入 isFavorite:false
-      vm.products.forEach((productItem, index) => {
-        this.$set(vm.products[index], 'isFavorite', false);
-        vm.favorites.forEach((favoriteItem) => {
-          if (productItem.id === favoriteItem.id) {
-            this.$set(vm.products[index], 'isFavorite', true);
+    getData() {
+      const { categoryName } = this.$route.query;
+      this.$store.dispatch('favoriteModules/getFavorites')
+        .then(() => this.$store.dispatch('productsModules/getProducts', { routerName: this.$route.name }))
+        .then(() => {
+          if (categoryName) {
+            this.getCategory({ title: categoryName });
+          } else {
+            this.$store.dispatch('paginationModules/getPagination', { routerName: this.$route.name, data: this.products });
           }
         });
-      });
     },
     addFavorite(item) {
-      const vm = this;
-      const favoriteData = {
-        id: item.id,
-        title: item.title,
-        imageUrl: item.imageUrl[0],
-      };
-      vm.favorites.push(favoriteData);
-      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
-
-      const msg = {
-        icon: 'success',
-        title: '已加入我的最愛',
-      };
-      vm.$bus.$emit('alertmessage', msg);
-
-      vm.$emit('get-favorites');
-      vm.getFavorites();
+      this.$store.dispatch('favoriteModules/addFavorite', item)
+        .then(() => {
+          this.$store.dispatch('productsModules/getProducts', { routerName: this.$route.name });
+        });
     },
     delFavoriteItem(item) {
-      const vm = this;
-      vm.favorites.forEach((favoriteItem, index) => {
-        if (favoriteItem.id === item.id) {
-          vm.favorites.splice(index, 1);
-        }
-      });
-      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
-
-      const msg = {
-        icon: 'success',
-        title: '已刪除我的最愛',
-      };
-      vm.$bus.$emit('alertmessage', msg);
-
-      vm.$emit('get-favorites');
-      vm.getFavorites();
-    },
-    getQuery() {
-      const vm = this;
-      const { categoryName } = vm.$route.query;
-      if (categoryName) {
-        vm.filterCategory = categoryName;
-        vm.categories.forEach((item, index) => {
-          if (item.title === vm.filterCategory) {
-            vm.bannerImg = vm.categories[index].bannerImg;
-          }
+      this.$store.dispatch('favoriteModules/delFavoriteItem', item)
+        .then(() => {
+          this.$store.dispatch('productsModules/getProducts', { routerName: this.$route.name });
         });
-      }
     },
     getCategory(category) {
       const vm = this;
       vm.filterCategory = category.title;
 
       // 切換分類，更換封面圖
-      vm.categories.forEach((item, index) => {
-        if (item.title === vm.filterCategory) {
-          vm.categoryImg = vm.categories[index].categoryImg;
-        }
-      });
+      vm.$store.dispatch('productsModules/updateCategoryImg', vm.filterCategory);
 
       // 切換分類，更新頁碼資訊
-      vm.updataPagination();
+      vm.$store.dispatch('paginationModules/updatePagination', vm.newProducts);
 
       // 切換分類，清除搜尋
       if (vm.filterText) {
         vm.filterText = '';
       }
-    },
-    updataPagination() {
-      const vm = this;
-      const resultLen = Number(vm.newProducts.length);
-      const perpage = 6;
-      let totalPages = 1;
-      if (resultLen) {
-        totalPages = Math.ceil(resultLen / Number(perpage));
-      }
-
-      vm.pagination = {
-        perpage: 6,
-        result_length: 0,
-        total_pages: totalPages,
-        current_page: 1,
-      };
     },
     search() {
       const vm = this;
@@ -331,7 +163,7 @@ export default {
         vm.filterText = vm.searchText;
 
         // 切換分類，更新頁碼資訊
-        vm.updataPagination();
+        vm.$store.dispatch('paginationModules/updatePagination', vm.newProducts);
 
         vm.searchText = '';
       } else {
@@ -340,13 +172,13 @@ export default {
           text: '搜尋內容為空，請輸入搜尋文字',
           status: 'danger',
         };
-        vm.$bus.$emit('alertmessage', msg, 'modal');
+        vm.$store.dispatch('alertMessageModules/openModal', msg);
       }
     },
     changePage(currentPage) {
-      this.currentPage = currentPage;
-      this.pagination.current_page = Number(currentPage);
+      this.$store.dispatch('paginationModules/updateCurrentPage', currentPage);
     },
+    ...mapActions('cartModules', ['getCarts']),
   },
   computed: {
     newProducts() {
@@ -383,13 +215,17 @@ export default {
       });
       return data;
     },
+    ...mapGetters('cartModules', ['carts']),
+    ...mapGetters('productsModules', ['products', 'categories', 'categoryImg']),
+    ...mapGetters('favoriteModules', ['favorites']),
+    ...mapGetters('paginationModules', ['pagination']),
   },
   components: {
     Pagination,
   },
   created() {
-    this.getProducts();
-    this.getCarts();
+    this.$store.dispatch('cartModules/getCarts');
+    this.getData();
   },
 };
 </script>

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <AlertMessage/>
     <loading :active.sync="isLoading" :is-full-page="true"></loading>
 
     <div class="header-wrap" :class="{'header-scroll': isMenuOpen || scrollHeader}">
@@ -127,8 +126,7 @@
       </div>
     </div>
 
-    <router-view @get-carts="getCarts" @get-favorites="getFavorites" :key="$route.fullPath"
-     ref="view"></router-view>
+    <router-view :key="$route.fullPath"></router-view>
 
     <div class="footer">
       ⓒ 2020 Adagio by Carol
@@ -138,94 +136,33 @@
 
 <script>
 /* global $ */
-import AlertMessage from '@/components/AlertMessage.vue';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'Layout',
   data() {
     return {
-      isLoading: false,
       scrollHeader: false,
       isMenuOpen: false,
       routerName: this.$route.name,
-      carts: [],
-      cartsNum: 0,
-      favorites: [],
-      favoritesNum: 0,
     };
   },
   methods: {
-    getCarts() {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping`;
-      vm.isLoading = false;
-      vm.$http.get(url).then((res) => {
-        let num = 0;
-        vm.carts = res.data.data;
-        vm.carts.forEach((item) => {
-          num += item.quantity;
-        });
-        vm.cartsNum = num;
-        vm.isLoading = false;
-      });
-    },
     delCartItem(id) {
-      const vm = this;
-      const url = `${process.env.VUE_APP_APIPATH}/${process.env.VUE_APP_UUID}/ec/shopping/${id}`;
-      vm.isLoading = true;
-      vm.$http.delete(url, { product: id }).then(() => {
-        vm.isLoading = false;
-        const msg = {
-          icon: 'success',
-          title: '已刪除此筆資料',
-        };
-        vm.$bus.$emit('alertmessage', msg);
-        vm.getCarts();
-
-        // 若在 checkorder 或 Products 或 Product 頁則重整內頁購物車
-        const routerName = vm.$refs.view.$route.name;
-        if (routerName === 'Products' || routerName === 'Product' || routerName === 'CreateOrder') {
-          vm.$refs.view.getCarts();
-        }
-      }).catch(() => {
-        vm.isLoading = false;
-        const msg = {
-          icon: 'error',
-          title: '刪除購物車失敗',
-        };
-        vm.$bus.$emit('alertmessage', msg);
-      });
+      this.$store.dispatch('cartModules/delCartItem', id);
     },
-    getFavorites() {
-      const vm = this;
-      const favoriteData = JSON.parse(localStorage.getItem('favoriteData')) || [];
-      vm.favorites = favoriteData;
-      vm.favoritesNum = favoriteData.length;
-    },
-    delFavoriteItem(product) {
-      const vm = this;
-      vm.favorites.forEach((item, index) => {
-        if (item.id === product.id) {
-          this.favorites.splice(index, 1);
-        }
-      });
-      localStorage.setItem('favoriteData', JSON.stringify(vm.favorites));
-      const msg = {
-        icon: 'success',
-        title: '已刪除我的最愛',
-      };
-      vm.$bus.$emit('alertmessage', msg);
-      vm.getFavorites();
-
-      // 若在 Products 或 Product 頁則重整內頁我的最愛
-      const routerName = vm.$refs.view.$route.name;
-      if (routerName === 'Product' || routerName === 'Products') {
-        vm.$refs.view.getFavorites();
-      }
+    delFavoriteItem(item) {
+      const { routerName } = this;
+      this.$store.dispatch('favoriteModules/delFavoriteItem', item)
+        .then(() => {
+          if (routerName === 'Products') {
+            this.$store.dispatch('productsModules/getProducts', { routerName });
+          }
+        });
     },
     delFavoriteAll() {
-      const vm = this;
-      vm.$swal({
+      const { routerName } = this;
+      this.$swal({
         title: '刪除我的最愛',
         text: '確定要刪除全部我的最愛 (刪除後無法復原)',
         showCancelButton: true,
@@ -238,19 +175,12 @@ export default {
         },
       }).then((result) => {
         if (result.isConfirmed) {
-          localStorage.removeItem('favoriteData');
-          const msg = {
-            icon: 'success',
-            title: '已刪除全部我的最愛',
-          };
-          vm.$bus.$emit('alertmessage', msg);
-          vm.getFavorites();
-
-          // 若在 Products 或 Product 頁則重整內頁我的最愛
-          const routerName = vm.$refs.view.$route.name;
-          if (routerName === 'Product' || routerName === 'Products') {
-            vm.$refs.view.getFavorites();
-          }
+          this.$store.dispatch('favoriteModules/delFavoriteAll')
+            .then(() => {
+              if (routerName === 'Products') {
+                this.$store.dispatch('productsModules/getProducts', { routerName });
+              }
+            });
         }
       });
     },
@@ -273,9 +203,12 @@ export default {
           break;
       }
     },
+    ...mapActions('cartModules', ['getCarts']),
   },
-  components: {
-    AlertMessage,
+  computed: {
+    ...mapGetters(['isLoading']),
+    ...mapGetters('cartModules', ['carts', 'cartsNum']),
+    ...mapGetters('favoriteModules', ['favorites', 'favoritesNum']),
   },
   watch: {
     $route(to, from) {
@@ -289,8 +222,8 @@ export default {
   },
   created() {
     const vm = this;
-    vm.getCarts();
-    vm.getFavorites();
+    vm.$store.dispatch('cartModules/getCarts');
+    vm.$store.dispatch('favoriteModules/getFavorites');
     vm.scrollPage();
   },
 };

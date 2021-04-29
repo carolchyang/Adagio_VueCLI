@@ -1,6 +1,5 @@
 <template>
   <div>
-    <AlertMessage/>
     <loading :active.sync="isLoading" :is-full-page="true"></loading>
 
     <nav class="navbar sticky-top navbar-dark bg-dark">
@@ -67,13 +66,12 @@
 </template>
 
 <script>
-import AlertMessage from '@/components/AlertMessage.vue';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'DashboardLayout',
   data() {
     return {
-      isLoading: false,
       token: '',
       checkSuccess: false,
     };
@@ -82,24 +80,25 @@ export default {
     logout() {
       const vm = this;
       const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1');
-      vm.isLoading = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http({
         method: 'post',
         url: `${process.env.VUE_APP_APIPATH}/auth/logout`,
         data: { api_token: token },
-        herders: {
+        headers: {
           authorization: `Bearer ${token}`,
         },
       }).then(() => {
         // 清空 cookie
         document.cookie = 'hexToken=;expires=;path=/';
-        vm.checkLogin = false;
+        vm.checkSuccess = false;
+        vm.$store.dispatch('updateLoading', false, { root: true });
 
         const msg = {
           icon: 'success',
           title: '登出成功',
         };
-        vm.$bus.$emit('alertmessage', msg);
+        vm.$store.dispatch('alertMessageModules/openToast', msg);
 
         vm.$router.push('/login');
       });
@@ -108,37 +107,29 @@ export default {
       const vm = this;
       const url = `${process.env.VUE_APP_APIPATH}/auth/check`;
       vm.token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1');
-      vm.isLoaing = true;
+      vm.$store.dispatch('updateLoading', true, { root: true });
       vm.$http.post(url, { api_token: vm.token }).then((res) => {
         if (!res.data.success) {
           const msg = {
             icon: 'error',
             title: '出現錯誤',
           };
-          vm.$bus.$emit('alertmessage', msg);
+          vm.$store.dispatch('alertMessageModules/openToast', msg);
           vm.$router.push('/login');
         }
 
         vm.checkSuccess = true;
         vm.$http.defaults.headers.common.Authorization = `Bearer ${vm.token}`;
-        vm.isLoading = false;
-      }).catch(() => {
-        const msg = {
-          icon: 'error',
-          title: '出現錯誤',
-        };
-        vm.$bus.$emit('alertmessage', msg);
-        vm.$router.push('/login');
+        vm.$store.dispatch('updateLoading', false, { root: true });
       });
     },
   },
-  components: {
-    AlertMessage,
+  computed: {
+    ...mapGetters(['isLoading']),
   },
   created() {
     this.checkLogin();
   },
-
 };
 </script>
 
